@@ -8,17 +8,16 @@ import {
   Typography,
   Row,
   Col,
+  message,
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-import {makeServer} from '../../mock';
-import { useRouter } from 'next/router';
-
+import { makeServer } from "../../mock";
+import { useRouter } from "next/router";
 
 if (process.env.NODE_ENV === "development") {
-  makeServer({ environment: "development" })
+  makeServer({ environment: "development" });
 }
-
 
 const { Title } = Typography;
 
@@ -30,37 +29,38 @@ const LoginTitle = styled(Title)`
   text-align: center;
 `;
 
-const axios = require('axios');
-
+const axios = require("axios");
 
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  
-  const login = async(loginValues) =>{
-    console.log(loginValues);
+  const login = async (loginValues) => {
+    // console.log(loginValues);
 
-    await axios.get('/api/login',{
-      params:{
-        email:loginValues.email,
-        password:loginValues.password
-      }
-    })
-    .then(function(response){
-      const {data} = response
-      console.log(data.students)
-      if (data.students.length != 0){
-        localStorage.setItem('eamil',loginValues.email);
-        localStorage.setItem('password',loginValues.password);
-        router.push('/dashboard');
-      }else{
-        
-      };
-    })
-  }
-
-  
+    await axios
+      .get("/api/login", {
+        params: {
+          email: loginValues.email,
+          password: loginValues.password,
+          loginType: loginValues.loginType,
+          remember: loginValues.remember,
+        },
+      })
+      .then(function (response) {
+        // router.push("dashboard");
+        console.log(response);
+        if (response.status === 200) {
+          console.log("success");
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("loginType", response.data.loginType);
+          router.push("dashboard");
+        } else {
+          console.log(response.msg);
+          message.error(response.msg);
+        }
+      });
+  };
 
   return (
     <Row justify="center" style={{ margin: "5%" }}>
@@ -69,9 +69,10 @@ export default function Login() {
           name="login"
           initialValues={{
             remember: true,
+            loginType: "student",
           }}
-          form = {form}
-          onFinish = {(loginValues) => login(loginValues)}
+          form={form}
+          onFinish={(loginValues) => login(loginValues)}
         >
           <LoginTitle>课程管理助手</LoginTitle>
 
@@ -85,14 +86,10 @@ export default function Login() {
               },
             ]}
           >
-            <Radio.Group
-              defaultValue="stu"
-              buttonStyle="solid"
-              style={{ margin: 16 }}
-            >
-              <Radio.Button value="stu">Student</Radio.Button>
-              <Radio.Button value="tea">Teacher</Radio.Button>
-              <Radio.Button value="man">Manager</Radio.Button>
+            <Radio.Group buttonStyle="solid" style={{ margin: 16 }}>
+              <Radio.Button value="student">Student</Radio.Button>
+              <Radio.Button value="teacher">Teacher</Radio.Button>
+              <Radio.Button value="manager">Manager</Radio.Button>
             </Radio.Group>
           </Form.Item>
 
