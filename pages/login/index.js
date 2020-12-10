@@ -11,6 +11,14 @@ import {
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import styled from "styled-components";
+import {makeServer} from '../../mock';
+import { useRouter } from 'next/router';
+
+
+if (process.env.NODE_ENV === "development") {
+  makeServer({ environment: "development" })
+}
+
 
 const { Title } = Typography;
 
@@ -22,10 +30,37 @@ const LoginTitle = styled(Title)`
   text-align: center;
 `;
 
+const axios = require('axios');
+
+
 export default function Login() {
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
-  };
+  const [form] = Form.useForm();
+  const router = useRouter();
+
+  
+  const login = async(loginValues) =>{
+    console.log(loginValues);
+
+    await axios.get('/api/login',{
+      params:{
+        email:loginValues.email,
+        password:loginValues.password
+      }
+    })
+    .then(function(response){
+      const {data} = response
+      console.log(data.students)
+      if (data.students.length != 0){
+        localStorage.setItem('eamil',loginValues.email);
+        localStorage.setItem('password',loginValues.password);
+        router.push('/dashboard');
+      }else{
+        
+      };
+    })
+  }
+
+  
 
   return (
     <Row justify="center" style={{ margin: "5%" }}>
@@ -35,6 +70,8 @@ export default function Login() {
           initialValues={{
             remember: true,
           }}
+          form = {form}
+          onFinish = {(loginValues) => login(loginValues)}
         >
           <LoginTitle>课程管理助手</LoginTitle>
 
