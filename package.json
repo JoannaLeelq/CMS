@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "format": "prettier ./pages/**tsx ./components/**.tsx ./lib/**/*.ts --write"
   },
   "dependencies": {
     "@ant-design/icons": "^4.3.0",
@@ -17,6 +18,7 @@
     "styled-components": "^5.2.1"
   },
   "devDependencies": {
-    "miragejs": "^0.1.41"
+    "miragejs": "^0.1.41",
+    "prettier": "2.1.2"
   }
 }

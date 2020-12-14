@@ -1,22 +1,12 @@
-import "antd/dist/antd.css";
-import {
-  Form,
-  Input,
-  Button,
-  Checkbox,
-  Radio,
-  Typography,
-  Row,
-  Col,
-  message,
-} from "antd";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import styled from "styled-components";
-import { makeServer } from "../../mock";
-import { useRouter } from "next/router";
+import 'antd/dist/antd.css';
+import { Form, Input, Button, Checkbox, Radio, Typography, Row, Col, message } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import styled from 'styled-components';
+import { makeServer } from '../../mock';
+import { useRouter } from 'next/router';
 
-if (process.env.NODE_ENV === "development") {
-  makeServer({ environment: "development" });
+if (process.env.NODE_ENV === 'development') {
+  makeServer({ environment: 'development' });
 }
 
 const { Title } = Typography;
@@ -29,17 +19,15 @@ const LoginTitle = styled(Title)`
   text-align: center;
 `;
 
-const axios = require("axios");
+const axios = require('axios');
 
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
 
   const login = async (loginValues) => {
-    // console.log(loginValues);
-
     await axios
-      .get("/api/login", {
+      .get('/api/login', {
         params: {
           email: loginValues.email,
           password: loginValues.password,
@@ -48,28 +36,28 @@ export default function Login() {
         },
       })
       .then(function (response) {
-        // router.push("dashboard");
         console.log(response);
         if (response.status === 200) {
-          console.log("success");
-          localStorage.setItem("token", response.data.token);
-          localStorage.setItem("loginType", response.data.loginType);
-          router.push("dashboard");
-        } else {
-          console.log(response.msg);
-          message.error(response.msg);
+          console.log('success');
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('loginType', response.data.loginType);
+          router.push('dashboard');
         }
+      })
+      .catch(function (error) {
+        console.log(error);
+        message.error('the password or email is incorrect');
       });
   };
 
   return (
-    <Row justify="center" style={{ margin: "5%" }}>
+    <Row justify="center" style={{ margin: '5%' }}>
       <Col>
         <Form
           name="login"
           initialValues={{
             remember: true,
-            loginType: "student",
+            loginType: 'student',
           }}
           form={form}
           onFinish={(loginValues) => login(loginValues)}
@@ -82,7 +70,7 @@ export default function Login() {
             rules={[
               {
                 required: true,
-                message: "Please choose a login type",
+                message: 'Please choose a login type',
               },
             ]}
           >
@@ -98,11 +86,11 @@ export default function Login() {
             rules={[
               {
                 required: true,
-                message: "请输入邮箱",
+                message: '请输入邮箱',
               },
               {
-                type: "email",
-                message: "请输入邮箱",
+                type: 'email',
+                message: '请输入邮箱',
               },
             ]}
           >
@@ -114,20 +102,16 @@ export default function Login() {
             rules={[
               {
                 required: true,
-                message: "请输入密码",
+                message: '请输入密码',
               },
               {
                 min: 4,
                 max: 16,
-                message: "密码长度不对",
+                message: '密码长度不对',
               },
             ]}
           >
-            <Input
-              prefix={<LockOutlined />}
-              type="password"
-              placeholder="Password"
-            />
+            <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
           </Form.Item>
 
           <Form.Item name="remember" valuePropName="checked">
