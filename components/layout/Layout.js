@@ -1,14 +1,15 @@
-import "antd/dist/antd.css";
+import 'antd/dist/antd.css';
 import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   SelectOutlined,
   UserOutlined,
-} from "@ant-design/icons";
-import { Layout, Menu } from "antd";
-import React, { children, useState } from "react";
-import styled from "styled-components";
+} from '@ant-design/icons';
+import { Layout, Menu } from 'antd';
+import React, { children, useState } from 'react';
+import styled from 'styled-components';
+import { useRouter } from 'next/router';
 
 const { Header, Sider, Content } = Layout;
 
@@ -52,53 +53,64 @@ const StyledContent = styled(Content)`
   min-height: auto;
 `;
 
-class DashboardLayout extends React.Component {
-  state = {
-    collapsed: false,
+const axios = require('axios');
+
+export default function APPLayout(props) {
+  const router = useRouter();
+
+  const [collapsed, toggleCollapse] = useState(false);
+
+  const toggle = () => {
+    toggleCollapse(!collapsed);
   };
 
-  toggle = () => {
-    this.setState({
-      collapsed: !this.state.collapsed,
-    });
+  const logoutFunction = async () => {
+    await axios
+      .get('/api/logoutApp', {
+        params: {
+          token: localStorage.getItem('token'),
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          localStorage.clear();
+          router.push('login');
+        }
+      })
+      .catch(function (error) {
+        message.error('the token does not exist');
+      });
   };
 
-  render() {
-    return (
-      <Layout style={{ height: "100vh" }}>
-        <Sider collapsible collapsed={this.state.collapsed}>
-          <Logo>CMS</Logo>
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
-            <Menu.Item key="1" icon={<UserOutlined />}>
-              学员列表
-            </Menu.Item>
+  return (
+    <Layout style={{ height: '100vh' }}>
+      <Sider collapsible collapsed={collapsed}>
+        <Logo>CMS</Logo>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+          <Menu.Item key="1" icon={<UserOutlined />}>
+            学员列表
+          </Menu.Item>
 
-            <Menu.Item key="2" icon={<SelectOutlined />}>
-              选择学员
-            </Menu.Item>
-          </Menu>
-        </Sider>
+          <Menu.Item key="2" icon={<SelectOutlined />}>
+            选择学员
+          </Menu.Item>
+        </Menu>
+      </Sider>
 
-        <Layout>
-          <StyledLayoutHeader>
-            <HeaderIcon onClick={this.toggle}>
-              {this.state.collapsed ? (
-                <MenuUnfoldOutlined />
-              ) : (
-                <MenuFoldOutlined />
-              )}
-            </HeaderIcon>
+      <Layout>
+        <StyledLayoutHeader>
+          <HeaderIcon onClick={toggle}>
+            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </HeaderIcon>
 
-            <HeaderIcon>
-              <LogoutOutlined />
-            </HeaderIcon>
-          </StyledLayoutHeader>
+          <HeaderIcon>
+            <LogoutOutlined onClick={logoutFunction} />
+            {/* <LogoutOutlined /> */}
+          </HeaderIcon>
+        </StyledLayoutHeader>
 
-          <StyledContent>{this.props.children}</StyledContent>
-        </Layout>
+        <StyledContent>{props.children}</StyledContent>
       </Layout>
-    );
-  }
+    </Layout>
+  );
 }
-
-export default DashboardLayout;

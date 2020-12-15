@@ -36,11 +36,11 @@ export default function Login() {
         },
       })
       .then(function (response) {
-        console.log(response);
+        console.log(response.data.data);
         if (response.status === 200) {
           console.log('success');
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('loginType', response.data.loginType);
+          localStorage.setItem('token', response.data.data.token);
+          localStorage.setItem('loginType', response.data.data.loginType);
           router.push('dashboard');
         }
       })

@@ -78,6 +78,20 @@ export function makeServer({ environment = 'development' } = {}) {
         },
         { timing: 4000 }
       );
+
+      this.get(
+        '/logoutApp',
+        (_, request) => {
+          // debugger;
+          let req = request.queryParams;
+          if (!!req.token) {
+            return new Response(200, {}, { data: req.token, msg: 'success', code: 200 });
+          } else {
+            return new Response(400, {}, { msg: 'Token is not exist', code: 400 });
+          }
+        },
+        { timing: 1000 }
+      );
     },
   });
 
