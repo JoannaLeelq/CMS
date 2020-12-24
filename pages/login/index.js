@@ -1,9 +1,12 @@
 import 'antd/dist/antd.css';
 import { Form, Input, Button, Checkbox, Radio, Typography, Row, Col, message } from 'antd';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, RollbackOutlined, UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { makeServer } from '../../mock';
 import { useRouter } from 'next/router';
+import { Role } from '../../lib/constant/role';
+import apiService from '../../lib/services/api-service';
+import { rootPath, subPath } from '../../lib/services/api-path';
 
 if (process.env.NODE_ENV === 'development') {
   makeServer({ environment: 'development' });
@@ -19,35 +22,21 @@ const LoginTitle = styled(Title)`
   text-align: center;
 `;
 
-const axios = require('axios');
+// const axios = require('axios');
 
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
 
   const login = async (loginValues) => {
-    await axios
-      .get('/api/login', {
-        params: {
-          email: loginValues.email,
-          password: loginValues.password,
-          loginType: loginValues.loginType,
-          remember: loginValues.remember,
-        },
-      })
-      .then(function (response) {
-        console.log(response.data.data);
-        if (response.status === 200) {
-          console.log('success');
-          localStorage.setItem('token', response.data.data.token);
-          localStorage.setItem('loginType', response.data.data.loginType);
-          router.push('dashboard');
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-        message.error('the password or email is incorrect');
-      });
+    const { data } = await apiService.login(loginValues);
+    console.log({ data });
+
+    if (!!data) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('loginType', data.loginType);
+      router.push(rootPath.students);
+    }
   };
 
   return (
@@ -75,9 +64,9 @@ export default function Login() {
             ]}
           >
             <Radio.Group buttonStyle="solid" style={{ margin: 16 }}>
-              <Radio.Button value="student">Student</Radio.Button>
-              <Radio.Button value="teacher">Teacher</Radio.Button>
-              <Radio.Button value="manager">Manager</Radio.Button>
+              <Radio.Button value={Role.Student}>Student</Radio.Button>
+              <Radio.Button value={Role.Teacher}>Teacher</Radio.Button>
+              <Radio.Button value={Role.Manager}>Manager</Radio.Button>
             </Radio.Group>
           </Form.Item>
 

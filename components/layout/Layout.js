@@ -10,6 +10,7 @@ import { Layout, Menu } from 'antd';
 import React, { children, useState } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
+import apiService from '../../lib/services/api-service';
 
 const { Header, Sider, Content } = Layout;
 
@@ -65,21 +66,15 @@ export default function APPLayout(props) {
   };
 
   const logoutFunction = async () => {
-    await axios
-      .get('/api/logoutApp', {
-        params: {
-          token: localStorage.getItem('token'),
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          localStorage.clear();
-          router.push('login');
-        }
-      })
-      .catch(function (error) {
-        message.error('the token does not exist');
-      });
+    const token = localStorage.getItem('token');
+    const { data } = await apiService.logout({ token: token });
+
+    if (data) {
+      // localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('loginType');
+      router.push('/login');
+    }
   };
 
   return (

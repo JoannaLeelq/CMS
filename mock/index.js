@@ -1,4 +1,5 @@
 import { Server, Model, Response } from 'miragejs';
+import { rootPath, subPath } from '../lib/services/api-path';
 
 export function makeServer({ environment = 'development' } = {}) {
   let users = require('./user.json');
@@ -30,9 +31,8 @@ export function makeServer({ environment = 'development' } = {}) {
       this.namespace = 'api';
 
       this.get(
-        '/login',
+        rootPath.login,
         (schema, request) => {
-          //   debugger;
           let req = request.queryParams;
           let user = schema.users.where({
             email: req.email,
@@ -61,16 +61,31 @@ export function makeServer({ environment = 'development' } = {}) {
       );
 
       this.get(
-        '/dashboard',
-        (schema, _) => {
-          // debugger;
-          let allStudentData = schema.students.all();
+        rootPath.students,
+        (schema, request) => {
+          debugger;
+          let req = request.queryParams;
+          let limit = req.limit;
+          let page = req.page;
+          let query = req.query;
+          let allStudentData = schema.students.all().models;
+          let students = allStudentData.filter((student) => !query || student.name.includes(query));
+
+          const total = !query ? allStudentData.length : students.length;
+          let data = { total, students };
+
+          if (limit && page) {
+            const start = limit * (page - 1);
+            students = students.slice(start, start + limit);
+            data = { ...data, paginator: { page, limit, total } };
+          }
+
           // return allStudentData;
           return new Response(
             200,
             {},
             {
-              data: { students: allStudentData },
+              data: { ...data, students },
               msg: 'success',
               code: 200,
             }
@@ -79,16 +94,10 @@ export function makeServer({ environment = 'development' } = {}) {
         { timing: 4000 }
       );
 
-      this.get(
-        '/logoutApp',
+      this.post(
+        rootPath.logout,
         (_, request) => {
-          // debugger;
-          let req = request.queryParams;
-          if (!!req.token) {
-            return new Response(200, {}, { data: req.token, msg: 'success', code: 200 });
-          } else {
-            return new Response(400, {}, { msg: 'Token is not exist', code: 400 });
-          }
+          return new Response(200, {}, { data: true, msg: 'success', code: 200 });
         },
         { timing: 1000 }
       );
