@@ -1,16 +1,16 @@
-import APPLayout from '../../../components/layout/layout';
+import APPLayout from '../../../../components/layout/layout';
 import 'antd/dist/antd.css';
 import styled from 'styled-components';
-import { Input, Table, Space, Pagination, Button, Popconfirm } from 'antd';
+import { Input, Table, Space, Pagination, Button, Popconfirm, Breadcrumb } from 'antd';
 import React, { useState, useEffect, useCallback } from 'react';
-import { makeServer } from '../../../mock';
+import { makeServer } from '../../../../mock';
 import Axios from 'axios';
-import apiService from '../../../lib/services/api-service';
+import apiService from '../../../../lib/services/api-service';
 import { debounce, omitBy, throttle } from 'lodash';
 import Link from 'next/link';
 import { PlusOutlined } from '@ant-design/icons';
-import ModalForm from '../../../components/common/modal-form';
-import AddStudentForm from '../../../components/students/add-student';
+import ModalForm from '../../../../components/common/modal-form';
+import AddStudentForm from '../../../../components/students/add-student';
 import { formatDistanceToNow } from 'date-fns';
 
 if (process.env.NODE_ENV === 'development') {
@@ -74,10 +74,9 @@ export default function Dashboard() {
         return preItemCode.localeCompare(nextItemCode);
       },
       sortDirections: ['ascend', 'descend'],
-      // render: (_, record) => {
-      //   // console.log('record: ', record);
-      //   <Link href={`/dashboard/students/${record.id}`}>{record.name}</Link>;
-      // },
+      render: (_, record) => (
+        <Link href={`/dashboard/manager/students/${record.id}`}>{record.name}</Link>
+      ),
     },
     {
       title: 'Area',

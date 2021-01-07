@@ -6,11 +6,19 @@ import {
   SelectOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu } from 'antd';
+import Link from 'next/link';
+import { Layout, Menu, Breadcrumb } from 'antd';
 import React, { children, useState } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import apiService from '../../lib/services/api-service';
+import { routes } from '../../lib/constant/routes';
+import { useUserType } from '../custom-hooks/loginState';
+import storage from '../../lib/services/storage';
+import { generateKey, getActiveKey } from '../../lib/util/side-nav';
+import { replace } from 'lodash';
+import SubMenu from 'antd/lib/menu/SubMenu';
+import AppBreadcrumb from '../breadcrumb';
 
 const { Header, Sider, Content } = Layout;
 
@@ -54,12 +62,57 @@ const StyledContent = styled(Content)`
   min-height: auto;
 `;
 
+const getMenuConfig = (data) => {
+  const key = getActiveKey(data);
+  const defaultSelectedKeys = key.split('/').pop();
+  const defaultOpenKeys = key.split('/').slice(0, -1);
+
+  return { defaultSelectedKeys, defaultOpenKeys };
+};
+
+function renderMenuItems(data, parent = '') {
+  const userType = useUserType();
+
+  return data.map((item, index) => {
+    const key = generateKey(item, index);
+    // console.log(item);
+
+    if (item.subNav && !!item.subNav.length) {
+      return (
+        <SubMenu key={key} title={item.label} icon={item.icon}>
+          {renderMenuItems(item.subNav, item.path.join('/'))}
+        </SubMenu>
+      );
+    } else {
+      return (
+        <Menu.Item key={key} title={item.label} icon={item.icon}>
+          {!!item.path.length || item.label.toLocaleLowerCase() === 'overview' ? (
+            <Link
+              href={['/dashboard', userType, parent, ...item.path]
+                .filter((item) => !!item)
+                .join('/')}
+              replace
+            >
+              {item.label}
+            </Link>
+          ) : (
+            item.label
+          )}
+        </Menu.Item>
+      );
+    }
+  });
+}
+
 const axios = require('axios');
 
 export default function APPLayout(props) {
   const router = useRouter();
-
   const [collapsed, toggleCollapse] = useState(false);
+  const userType = useUserType();
+  const sideNav = routes[userType];
+  const menuItems = renderMenuItems(sideNav);
+  const { defaultOpenKeys, defaultSelectedKeys } = getMenuConfig(sideNav);
 
   const toggle = () => {
     toggleCollapse(!collapsed);
@@ -70,9 +123,7 @@ export default function APPLayout(props) {
     const { data } = await apiService.logout({ token: token });
 
     if (data) {
-      // localStorage.clear();
-      localStorage.removeItem('token');
-      localStorage.removeItem('loginType');
+      storage.deleteUserInfo();
       router.push('/login');
     }
   };
@@ -81,14 +132,13 @@ export default function APPLayout(props) {
     <Layout style={{ height: '100vh' }}>
       <Sider collapsible collapsed={collapsed}>
         <Logo>CMS</Logo>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1" icon={<UserOutlined />}>
-            学员列表
-          </Menu.Item>
-
-          <Menu.Item key="2" icon={<SelectOutlined />}>
-            选择学员
-          </Menu.Item>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultOpenKeys={defaultOpenKeys}
+          defaultSelectedKeys={defaultSelectedKeys}
+        >
+          {menuItems}
         </Menu>
       </Sider>
 
@@ -100,9 +150,10 @@ export default function APPLayout(props) {
 
           <HeaderIcon>
             <LogoutOutlined onClick={logoutFunction} />
-            {/* <LogoutOutlined /> */}
           </HeaderIcon>
         </StyledLayoutHeader>
+
+        <AppBreadcrumb />
 
         <StyledContent>{props.children}</StyledContent>
       </Layout>

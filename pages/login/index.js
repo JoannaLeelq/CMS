@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { Role } from '../../lib/constant/role';
 import apiService from '../../lib/services/api-service';
 import { rootPath, subPath } from '../../lib/services/api-path';
+import storage from '../../lib/services/storage';
 
 if (process.env.NODE_ENV === 'development') {
   makeServer({ environment: 'development' });
@@ -30,12 +31,10 @@ export default function Login() {
 
   const login = async (loginValues) => {
     const { data } = await apiService.login(loginValues);
-    console.log({ data });
 
     if (!!data) {
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('loginType', data.loginType);
-      router.push(rootPath.students);
+      storage.setUserInfo(data);
+      router.push(`/dashboard/${data.loginType}`);
     }
   };
 
