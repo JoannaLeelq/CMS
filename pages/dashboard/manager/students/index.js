@@ -3,7 +3,6 @@ import 'antd/dist/antd.css';
 import styled from 'styled-components';
 import { Input, Table, Space, Pagination, Button, Popconfirm, Breadcrumb } from 'antd';
 import React, { useState, useEffect, useCallback } from 'react';
-import { makeServer } from '../../../../mock';
 import Axios from 'axios';
 import apiService from '../../../../lib/services/api-service';
 import { debounce, omitBy, throttle } from 'lodash';
@@ -13,9 +12,9 @@ import ModalForm from '../../../../components/common/modal-form';
 import AddStudentForm from '../../../../components/students/add-student';
 import { formatDistanceToNow } from 'date-fns';
 
-if (process.env.NODE_ENV === 'development') {
-  makeServer({ environment: 'development' });
-}
+// if (process.env.NODE_ENV === 'development') {
+//   makeServer({ environment: 'development' });
+// }
 
 const Search = styled(Input.Search)`
   width: 30%;

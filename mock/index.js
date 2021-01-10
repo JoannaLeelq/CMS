@@ -2,7 +2,7 @@ import { Server, Model, Response, belongsTo, hasMany } from 'miragejs';
 import { format } from 'date-fns';
 import { rootPath, subPath } from '../lib/services/api-path';
 
-export function makeServer({ environment = 'development' } = {}) {
+export default function makeServer({ environment = 'development' } = {}) {
   let users = require('./user.json');
   let students = require('./student.json');
   let studentTypes = require('./student_type.json');

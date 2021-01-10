@@ -10,7 +10,7 @@ export default function AppBreadcrumb() {
   const router = useRouter();
   const path = router.pathname;
   const paths = path.split('/').slice(2);
-  console.log(paths);
+  // console.log(paths);
 
   return (
     <Breadcrumb style={{ margin: '0 16px', padding: 16 }}>

@@ -75,23 +75,21 @@ function renderMenuItems(data, parent = '') {
 
   return data.map((item, index) => {
     const key = generateKey(item, index);
-    // console.log(item);
 
     if (item.subNav && !!item.subNav.length) {
       return (
-        <SubMenu key={key} title={item.label} icon={item.icon}>
+        <SubMenu key={key} icon={item.icon} title={item.label}>
           {renderMenuItems(item.subNav, item.path.join('/'))}
         </SubMenu>
       );
     } else {
       return (
         <Menu.Item key={key} title={item.label} icon={item.icon}>
-          {!!item.path.length || item.label.toLocaleLowerCase() === 'overview' ? (
+          {!!item.path.length || item.label.toLowerCase() === 'overview' ? (
             <Link
               href={['/dashboard', userType, parent, ...item.path]
                 .filter((item) => !!item)
                 .join('/')}
-              replace
             >
               {item.label}
             </Link>

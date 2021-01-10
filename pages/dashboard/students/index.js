@@ -13,9 +13,9 @@ import ModalForm from '../../../components/common/modal-form';
 import AddStudentForm from '../../../components/students/add-student';
 import { formatDistanceToNow } from 'date-fns';
 
-if (process.env.NODE_ENV === 'development') {
-  makeServer({ environment: 'development' });
-}
+// if (process.env.NODE_ENV === 'development') {
+//   makeServer({ environment: 'development' });
+// }
 
 const Search = styled(Input.Search)`
   width: 30%;

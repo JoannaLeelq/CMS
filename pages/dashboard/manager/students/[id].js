@@ -26,6 +26,12 @@ const tagColor = [
   'lime',
 ];
 
+export async function getServerSideProps(context) {
+  return {
+    props: { id: context.params.id },
+  };
+}
+
 export default function DetailPage(props) {
   const router = useRouter();
   const [data, setData] = useState();
@@ -76,6 +82,7 @@ export default function DetailPage(props) {
   };
 
   useEffect(() => {
+    debugger;
     const id = router.query.id || props.id;
     apiService.getStudentProfile({ id }).then((res) => {
       console.log(res.data);
