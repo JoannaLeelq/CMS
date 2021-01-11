@@ -2,16 +2,16 @@ import 'antd/dist/antd.css';
 import { Form, Input, Button, Checkbox, Radio, Typography, Row, Col, message } from 'antd';
 import { LockOutlined, RollbackOutlined, UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
-import { makeServer } from '../../mock';
+import makeServer from '../../mock';
 import { useRouter } from 'next/router';
 import { Role } from '../../lib/constant/role';
 import apiService from '../../lib/services/api-service';
 import { rootPath, subPath } from '../../lib/services/api-path';
 import storage from '../../lib/services/storage';
 
-if (process.env.NODE_ENV === 'development') {
-  makeServer({ environment: 'development' });
-}
+// if (process.env.NODE_ENV === 'development') {
+//   makeServer({ environment: 'development' });
+// }
 
 const { Title } = Typography;
 
