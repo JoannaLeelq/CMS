@@ -179,9 +179,8 @@ export default function makeServer({ environment = 'development' } = {}) {
 
         if (studentCourses.length) {
           courses = studentCourses.models.map((item) => {
-            console.log(item);
             item.attrs.courseName = item.course.name;
-            // item.attrs.type = item.course.type.name;
+            item.attrs.type = item.course.type.name;
             return item;
           });
         }

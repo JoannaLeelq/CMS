@@ -3,7 +3,7 @@ import 'antd/dist/antd.css';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import apiService from '../../../../lib/services/api-service';
-import { Row, Col, Card, Tag } from 'antd';
+import { Row, Col, Card, Tag, Table } from 'antd';
 import Avatar from 'antd/lib/avatar/avatar';
 import styled from 'styled-components';
 
@@ -38,6 +38,7 @@ export default function DetailPage(props) {
   const [left, setLeft] = useState([]);
   const [aboutInfo, setAbout] = useState([]);
   const [key, setKey] = useState({ key: 'about' });
+  const [courseInfo, setCourse] = useState([]);
 
   const tabList = [
     { key: 'about', tab: 'About' },
@@ -77,6 +78,37 @@ export default function DetailPage(props) {
     </div>
   );
 
+  // for courses part
+  const coursesColumns = [
+    {
+      title: 'No.',
+      dataIndex: 'no',
+      key: 'no',
+      render: (_1, _2, index) => index + 1,
+    },
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+    },
+    {
+      title: 'Join Time',
+      dataIndex: 'joinTime',
+      key: 'joinTime',
+    },
+  ];
+
+  const coursesDataSource = courseInfo.map((item) => ({
+    name: item.courseName,
+    type: item.type,
+    joinTime: item.ctime,
+  }));
+
   const onTabChange = (key, type) => {
     setKey({ [type]: key });
   };
@@ -106,17 +138,13 @@ export default function DetailPage(props) {
       ];
       setLeft(left);
       setAbout(aboutInfo);
+      setCourse(res.data.courses);
     });
   }, []);
 
   const contentList = {
     about: aboutPart(aboutInfo),
-    courses: (
-      <div>
-        <p>m</p>
-        <p>n</p>
-      </div>
-    ),
+    courses: <Table dataSource={coursesDataSource} columns={coursesColumns} />,
   };
 
   return (

@@ -50,7 +50,7 @@ export default function Login() {
           form={form}
           onFinish={(loginValues) => login(loginValues)}
         >
-          <LoginTitle>课程管理助手</LoginTitle>
+          <LoginTitle>COURSE MANAGEMENT ASSISTANT</LoginTitle>
 
           <Form.Item
             name="loginType"
@@ -74,11 +74,11 @@ export default function Login() {
             rules={[
               {
                 required: true,
-                message: '请输入邮箱',
+                message: 'please input the email',
               },
               {
                 type: 'email',
-                message: '请输入邮箱',
+                message: 'please input the correct email',
               },
             ]}
           >
@@ -90,12 +90,12 @@ export default function Login() {
             rules={[
               {
                 required: true,
-                message: '请输入密码',
+                message: 'please input the password',
               },
               {
                 min: 4,
                 max: 16,
-                message: '密码长度不对',
+                message: 'the password should be 4-16 characters',
               },
             ]}
           >
@@ -103,12 +103,12 @@ export default function Login() {
           </Form.Item>
 
           <Form.Item name="remember" valuePropName="checked">
-            <Checkbox>记住我</Checkbox>
+            <Checkbox>remember me</Checkbox>
           </Form.Item>
 
           <Form.Item>
             <StyledButton type="primary" htmlType="submit">
-              登录
+              Login
             </StyledButton>
           </Form.Item>
         </Form>
