@@ -140,7 +140,7 @@ export default function APPLayout(props) {
         </Menu>
       </Sider>
 
-      <Layout>
+      <Layout id="contentPart">
         <StyledLayoutHeader>
           <HeaderIcon onClick={toggle}>
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

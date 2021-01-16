@@ -10,6 +10,8 @@ export default function makeServer({ environment = 'development' } = {}) {
   let studentProfile = require('./student-profile.json');
   let courses = require('./course.json');
   let courseTypes = require('./course_type.json');
+  let teachers = require('./teacher.json');
+
   let server = new Server({
     environment,
 
@@ -20,9 +22,11 @@ export default function makeServer({ environment = 'development' } = {}) {
         type: belongsTo('studentType'),
         studentCourse: hasMany(),
       }),
+      teacher: Model,
       courseType: Model,
       course: Model.extend({
         type: belongsTo('courseType'),
+        teacher: belongsTo(),
       }),
       studentCourse: Model.extend({
         course: belongsTo(),
@@ -35,6 +39,7 @@ export default function makeServer({ environment = 'development' } = {}) {
 
     seeds(server) {
       users.forEach((user) => server.create('user', user));
+      teachers.forEach((teacher) => server.create('teacher', teacher));
       courseTypes.forEach((type) => server.create('courseType', type));
       courses.forEach((course) => server.create('course', course));
       studentTypes.forEach((type) => server.create('studentType', type));
@@ -192,6 +197,28 @@ export default function makeServer({ environment = 'development' } = {}) {
           return new Response(200, {}, { data: targetStudent, msg: 'success', code: 200 });
         } else {
           return new Response(400, {}, { msg: `cannot find student by id ${id}`, code: 400 });
+        }
+      });
+
+      // all courses
+      this.get(rootPath.courses, (schema, request) => {
+        let { limit, page } = request.queryParams;
+        let allCourses = schema.courses.all().models;
+        const total = allCourses.length;
+
+        if (limit && page) {
+          allCourses = allCourses.slice(limit * (page - 1), limit * page);
+        }
+
+        allCourses.forEach((item) => {
+          item.attrs.teacherName = item.teacher.name;
+          item.attrs.typeName = item.type.name;
+        });
+
+        if (allCourses) {
+          return new Response(200, {}, { msg: 'success', code: 200, data: { total, allCourses } });
+        } else {
+          return new Response(500, {}, { msg: 'server error', code: 500 });
         }
       });
 

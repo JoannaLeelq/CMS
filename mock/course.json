@@ -1371,7 +1371,7 @@
         "cover": "http://v.bootstrapmb.com/2020/11/cbgse9169/images/courses/pic1.jpg",
         "ctime": "2020-07-14 18:45:0classTime4",
         "detail": "no",
-        "duration": "{count: 3, unit: 'day'}",
+        "duration": 3,
         "durationUnit": 1,
         "id": 141,
         "maxStudents": 5,
