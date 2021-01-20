@@ -8,10 +8,6 @@ import CourseOverview from '../../../../components/course/courseOverview';
 import apiService from '../../../../lib/services/api-service';
 import BackTop from '../../../../components/common/back-top';
 
-// const loadingIcon = styled.div`
-
-// `;
-
 export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [paginator, setPaginator] = useState({ limit: 8, page: 1 });
@@ -33,20 +29,25 @@ export default function Courses() {
       <InfiniteScroll
         next={() => setPaginator({ ...paginator, page: paginator.page + 1 })}
         hasMore={hasMore}
-        loader={<h3>loading...</h3>}
+        loader={
+          <div>
+            <Spin size="large" style={{ position: 'relative', left: '50%' }} />
+          </div>
+        }
         dataLength={courses.length}
         endMessage={<h3>No More Courses</h3>}
         scrollableTarget="contentPart"
         style={{ overflow: 'hidden' }}
       >
         <List
-          id="constainer"
           grid={{ gutter: 16, xs: 1, sm: 2, md: 2, lg: 4, xl: 4, xxl: 4 }}
           dataSource={courses}
           renderItem={(item) => (
             <List.Item key={item.id}>
               <CourseOverview {...item}>
-                <Button type="primary">Read More</Button>
+                <Link href={`/dashboard/manager/courses/${item.id}`} passHref>
+                  <Button type="primary">Read More</Button>
+                </Link>
               </CourseOverview>
             </List.Item>
           )}

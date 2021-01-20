@@ -1,4 +1,4 @@
-import 'antd/dist/antd.css';
+// import '../../pages/dashboard/students/node_modules/antd/dist/antd.css';
 import {
   LogoutOutlined,
   MenuFoldOutlined,
@@ -90,6 +90,7 @@ function renderMenuItems(data, parent = '') {
               href={['/dashboard', userType, parent, ...item.path]
                 .filter((item) => !!item)
                 .join('/')}
+              replace
             >
               {item.label}
             </Link>
@@ -128,7 +129,11 @@ export default function APPLayout(props) {
 
   return (
     <Layout style={{ height: '100vh' }}>
-      <Sider collapsible collapsed={collapsed}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(isCollapsed) => toggleCollapse(isCollapsed)}
+      >
         <Logo>CMS</Logo>
         <Menu
           theme="dark"

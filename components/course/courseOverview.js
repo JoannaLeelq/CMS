@@ -6,6 +6,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { DurationUnit } from '../../lib/constant/duration';
 
+const styledH2 = styled.h2`
+  font-weight: 600;
+`;
+
 const getDuration = (data) => {
   const duration = data.duration;
   const durationUnit = data.durationUnit;
@@ -18,8 +22,8 @@ export default function CourseOverview(props) {
   const gutter = [0, 20];
   console.log(props);
   return (
-    <Card cover={<img src={props.cover} />}>
-      <Row>
+    <Card cover={<img src={props.cover} />} bodyStyle={{ paddingBottom: 0 }}>
+      <Row gutter={gutter}>
         <h3>{props.name}</h3>
       </Row>
 
@@ -41,14 +45,14 @@ export default function CourseOverview(props) {
       <Row gutter={gutter} justify="space-between" style={{ borderBottom: '1px solid #b2b7b9' }}>
         <Col style={{ fontWeight: '600' }}>Teacher:</Col>
         <Col>
-          <b>{props.teacherName}</b>
+          <b style={{ color: '#4781C7' }}>{props.teacherName}</b>
         </Col>
       </Row>
 
       <Row gutter={gutter} justify="space-between">
         <Col style={{ fontWeight: '600' }}>
           <UserOutlined style={{ marginRight: 5, fontSize: 16, color: '#1890ff' }} />
-          Student Amount:
+          Student Limit:
         </Col>
         <Col>
           <b>{props.maxStudents}</b>

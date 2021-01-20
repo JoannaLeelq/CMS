@@ -1,4 +1,4 @@
-import APPLayout from '../../../components/layout/layout';
+import APPLayout from '../../../components/layout/Layout';
 import 'antd/dist/antd.css';
 import styled from 'styled-components';
 import { Input, Table, Space, Pagination, Button, Popconfirm } from 'antd';
@@ -33,7 +33,7 @@ const FlexContainer = styled.div`
 
 const axios = require('axios');
 
-export default function Dashboard() {
+export default function Dash() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -172,7 +172,7 @@ export default function Dashboard() {
     const req = { limit: pagination.pageSize, page: pagination.current, query };
 
     apiService.getStudent(req).then((res) => {
-      // console.log(res);
+      console.log(res);
       const { total, students } = res.data;
       setData(students);
       setTotal(total);
@@ -235,6 +235,7 @@ export default function Dashboard() {
           student={editingStudent}
         />
       </ModalForm>
+      <div>dashboard/student</div>
     </APPLayout>
   );
 }

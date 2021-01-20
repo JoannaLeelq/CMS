@@ -11,6 +11,8 @@ export default function makeServer({ environment = 'development' } = {}) {
   let courses = require('./course.json');
   let courseTypes = require('./course_type.json');
   let teachers = require('./teacher.json');
+  let schedule = require('./schedule.json');
+  let sales = require('./sales.json');
 
   let server = new Server({
     environment,
@@ -27,6 +29,8 @@ export default function makeServer({ environment = 'development' } = {}) {
       course: Model.extend({
         type: belongsTo('courseType'),
         teacher: belongsTo(),
+        sales: belongsTo(),
+        schedule: belongsTo(),
       }),
       studentCourse: Model.extend({
         course: belongsTo(),
@@ -35,11 +39,15 @@ export default function makeServer({ environment = 'development' } = {}) {
         studentCourse: hasMany(),
         type: belongsTo('studentType'),
       }),
+      sales: Model,
+      schedule: Model,
     },
 
     seeds(server) {
       users.forEach((user) => server.create('user', user));
       teachers.forEach((teacher) => server.create('teacher', teacher));
+      sales.forEach((sale) => server.create('sale', sale));
+      schedule.forEach((schedule) => server.create('schedule', schedule));
       courseTypes.forEach((type) => server.create('courseType', type));
       courses.forEach((course) => server.create('course', course));
       studentTypes.forEach((type) => server.create('studentType', type));
@@ -57,6 +65,7 @@ export default function makeServer({ environment = 'development' } = {}) {
 
       this.namespace = 'api';
 
+      // for login function
       this.get(rootPath.login, (schema, request) => {
         let req = request.queryParams;
         console.log(req);
@@ -72,7 +81,7 @@ export default function makeServer({ environment = 'development' } = {}) {
             {},
             {
               data: {
-                token: Math.random().toString(32).split('.')[1] + '~' + req.loginType,
+                token: Math.random().toString(32).split('.')[1] + '-' + req.loginType,
                 loginType: req.loginType,
               },
               code: 200,
@@ -84,6 +93,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         }
       });
 
+      //get Student List
       this.get(rootPath.students, (schema, request) => {
         let req = request.queryParams;
         let limit = req.limit;
@@ -130,7 +140,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         );
       });
 
-      // add student
+      // add student in the student List
       this.post(`/${rootPath.students}/${subPath.add}`, (schema, request) => {
         let newStudentInfo = JSON.parse(request.requestBody);
         const { name, email, area, type } = newStudentInfo;
@@ -147,6 +157,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         return new Response(200, {}, { msg: 'success', code: 200, data });
       });
 
+      //update student in the student List
       this.post(`/${rootPath.students}/${subPath.update}`, (schema, request) => {
         const { name, email, area, type, id } = JSON.parse(request.requestBody);
         const targetData = schema.students.findBy({ id });
@@ -168,6 +179,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         }
       });
 
+      //delete student in the student List
       this.delete(`/${rootPath.students}/${subPath.delete}`, (schema, request) => {
         let req = request.queryParams.id;
         const data = schema.students.find(req).destroy();
@@ -175,7 +187,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         return new Response(200, {}, { data: true, msg: 'success', code: 200 });
       });
 
-      // get student profile
+      // get single student profile
       this.get(rootPath.student, (schema, request) => {
         const id = request.queryParams.id;
         const targetStudent = schema.studentProfiles.findBy({ id });
@@ -219,6 +231,23 @@ export default function makeServer({ environment = 'development' } = {}) {
           return new Response(200, {}, { msg: 'success', code: 200, data: { total, allCourses } });
         } else {
           return new Response(500, {}, { msg: 'server error', code: 500 });
+        }
+      });
+
+      //get single course detail
+      this.get(rootPath.course, (schema, request) => {
+        const id = request.queryParams.id;
+        const targetCourse = schema.courses.findBy({ id });
+
+        targetCourse.attrs.teacherName = targetCourse.teacher.name;
+        targetCourse.attrs.schedule = targetCourse.schedule;
+        targetCourse.attrs.sales = targetCourse.sales;
+        targetCourse.attrs.typeName = targetCourse.type.name;
+
+        if (targetCourse) {
+          return new Response(200, {}, { data: targetCourse, msg: 'success', code: 200 });
+        } else {
+          return new Response(400, {}, { msg: `cannot find student by id ${id}`, code: 400 });
         }
       });
 

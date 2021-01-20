@@ -1,4 +1,3 @@
-import 'antd/dist/antd.css';
 import { Form, Input, Button, Checkbox, Radio, Typography, Row, Col, message } from 'antd';
 import { LockOutlined, RollbackOutlined, UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
@@ -31,6 +30,7 @@ export default function Login() {
 
   const login = async (loginValues) => {
     const { data } = await apiService.login(loginValues);
+    console.log(data.loginType);
 
     if (!!data) {
       storage.setUserInfo(data);

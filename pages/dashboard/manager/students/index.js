@@ -218,8 +218,6 @@ export default function Dashboard() {
       >
         <AddStudentForm
           onFinish={(student) => {
-            console.log(student);
-            console.log(editingStudent);
             if (!!editingStudent) {
               const index = data.findIndex((item) => item.id === student.id);
 
