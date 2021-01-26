@@ -9,6 +9,10 @@ import { rootPath, subPath } from '../../lib/services/api-path';
 import storage from '../../lib/services/storage';
 import Link from 'next/link';
 
+// if (process.env.NODE_ENV === 'development') {
+//   makeServer({ environment: 'development' });
+// }
+
 const { Title } = Typography;
 
 const StyledButton = styled(Button)`
@@ -19,16 +23,18 @@ const LoginTitle = styled(Title)`
   text-align: center;
 `;
 
+// const axios = require('axios');
+
 export default function Login() {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const login = async (loginValues) => {
-    const { data } = await apiService.login(loginValues);
+  const signup = async (signupValue) => {
+    const { data } = await apiService.signup(signupValue);
     console.log(data);
     if (!!data) {
       storage.setUserInfo(data);
-      router.push(`/dashboard/${data.role}`);
+      router.push(`/dashboard/${data.loginType}`);
     }
   };
 
@@ -39,15 +45,15 @@ export default function Login() {
           name="login"
           initialValues={{
             remember: true,
-            role: 'student',
+            loginType: 'student',
           }}
           form={form}
-          onFinish={(loginValues) => login(loginValues)}
+          onFinish={(signupValue) => signup(signupValue)}
         >
           <LoginTitle>COURSE MANAGEMENT ASSISTANT</LoginTitle>
 
           <Form.Item
-            name="role"
+            name="loginType"
             initialValues="student"
             rules={[
               {
@@ -102,9 +108,8 @@ export default function Login() {
 
           <Form.Item>
             <StyledButton type="primary" htmlType="submit">
-              Login
+              Sign Up
             </StyledButton>
-            or <Link href={'/signup'}>Sign Up</Link>
           </Form.Item>
         </Form>
       </Col>

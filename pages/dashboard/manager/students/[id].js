@@ -158,17 +158,17 @@ export default function DetailPage(props) {
             }
           >
             <Row>
-              {left.map((item) => {
+              {left.map((item, index) => {
                 if (item.label !== 'Address') {
                   return (
-                    <Col span={12} style={{ textAlign: 'center' }}>
+                    <Col span={12} style={{ textAlign: 'center' }} key={index}>
                       <h3>{item.label}</h3>
                       <p>{item.value}</p>
                     </Col>
                   );
                 } else {
                   return (
-                    <Col span={24} style={{ textAlign: 'center' }}>
+                    <Col span={24} style={{ textAlign: 'center' }} key={index}>
                       <h3>{item.label}</h3>
                       <p>{item.value}</p>
                     </Col>

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "test": "set API='http://cms.chtoma.com/api' && NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "format": "prettier ./pages/**tsx ./components/**.tsx ./lib/**/*.ts --write"
@@ -12,6 +13,8 @@
     "@ant-design/icons": "^4.3.0",
     "antd": "^4.9.1",
     "axios": "^0.21.0",
+    "crypto-js": "^4.0.0",
+    "date-fns": "^2.16.1",
     "lodash": "^4.17.20",
     "next": "^10.0.0",
     "react": "16.13.1",

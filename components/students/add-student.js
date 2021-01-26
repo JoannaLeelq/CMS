@@ -11,10 +11,10 @@ const ModalFormSubmit = styled(Form.Item)`
 `;
 
 export default function AddStudentForm(props) {
+  console.log(props);
   const [form] = Form.useForm();
-  const { onFinish, student } = props;
+  const { student, countries, onFinish } = props;
   const validateMessages = { required: `${name} is required` };
-  console.log(student);
 
   return (
     <Form
@@ -36,7 +36,7 @@ export default function AddStudentForm(props) {
       initialValues={{
         name: student?.name,
         email: student?.email,
-        area: student?.area,
+        country: student?.area,
         type: student?.typeName,
       }}
     >
@@ -52,12 +52,11 @@ export default function AddStudentForm(props) {
         <Input type="text" placeholder="email" />
       </Form.Item>
 
-      <Form.Item label="Area" name="area" rules={[{ required: true }]}>
+      <Form.Item label="Area" name="country" rules={[{ required: true }]}>
         <Select>
-          <Select.Option value="China">China</Select.Option>
-          <Select.Option value="Canada">Canada</Select.Option>
-          <Select.Option value="New Zealand">New Zealand</Select.Option>
-          <Select.Option value="Australia">Australia</Select.Option>
+          {countries.map((item) => (
+            <Select.Option value={item.en}>{item.en}</Select.Option>
+          ))}
         </Select>
       </Form.Item>
 

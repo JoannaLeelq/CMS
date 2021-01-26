@@ -20,9 +20,9 @@ const getDuration = (data) => {
 
 export default function CourseOverview(props) {
   const gutter = [0, 20];
-  console.log(props);
+
   return (
-    <Card cover={<img src={props.cover} />} bodyStyle={{ paddingBottom: 0 }}>
+    <Card cover={<img src={props.cover} />} {...props.cardCss}>
       <Row gutter={gutter}>
         <h3>{props.name}</h3>
       </Row>

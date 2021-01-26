@@ -11,10 +11,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import ModalForm from '../../../../components/common/modal-form';
 import AddStudentForm from '../../../../components/students/add-student';
 import { formatDistanceToNow } from 'date-fns';
-
-// if (process.env.NODE_ENV === 'development') {
-//   makeServer({ environment: 'development' });
-// }
+import { it } from 'date-fns/locale';
 
 const Search = styled(Input.Search)`
   width: 30%;
@@ -44,16 +41,16 @@ export default function Dashboard() {
   const [total, setTotal] = useState(0);
   const [isModalDisplay, setModalDisplay] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [countries, setCountries] = useState([]);
 
   const dataSource = data.map((item) => {
-    // console.log(item);
     return {
       id: item.id,
       name: item.name,
-      area: item.area,
+      area: item.country,
       email: item.email,
-      typeName: item.typeName,
-      joinTime: item.ctime,
+      typeName: item.type.name,
+      joinTime: item.createdAt,
       curriculum: item.courses,
     };
   });
@@ -81,12 +78,9 @@ export default function Dashboard() {
       title: 'Area',
       dataIndex: 'area',
       key: 'area',
-      filters: [
-        { text: 'Australia', value: 'Australia' },
-        { text: 'China', value: 'China' },
-        { text: 'New Zealand', value: 'New Zealand' },
-        { text: 'Canada', value: 'Canada' },
-      ],
+      filters: countries.map((item) => {
+        return { text: item.en, value: item.en };
+      }),
       onFilter: (value, record) => record.area.includes(value),
     },
     {
@@ -155,9 +149,9 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
 
   const debounceSearch = useCallback(
-    throttle((searchContent) => {
+    debounce((searchContent) => {
       setQuery(searchContent);
-    }, 3000),
+    }, 1000),
     []
   );
 
@@ -167,13 +161,19 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    const req = { limit: pagination.pageSize, page: pagination.current, query };
+    const req = {
+      page: pagination.current,
+      limit: pagination.pageSize,
+      query,
+    };
+
+    apiService.getAllCountries().then((res) => {
+      setCountries(res.data);
+    });
 
     apiService.getStudent(req).then((res) => {
-      // console.log(res);
-      const { total, students } = res.data;
-      setData(students);
-      setTotal(total);
+      setData(res.data.students);
+      setTotal(res.data.total);
       setLoading(false);
     });
   }, [pagination, query]);
@@ -229,6 +229,7 @@ export default function Dashboard() {
             setModalDisplay(false);
           }}
           student={editingStudent}
+          countries={countries}
         />
       </ModalForm>
     </APPLayout>

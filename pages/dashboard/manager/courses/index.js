@@ -16,7 +16,7 @@ export default function Courses() {
   useEffect(() => {
     apiService.getCourses(paginator).then((res) => {
       const total = res.data.total;
-      const newCourses = res.data.allCourses;
+      const newCourses = res.data.courses;
       const displayedCourses = [...courses, ...newCourses];
 
       setCourses(displayedCourses);

@@ -33,18 +33,35 @@ const StyledRow = styled(Row)`
   margin: 0 -24px 0 -24px !important;
 `;
 
-const genExtra = (sourcedata, processKey) => {
-  if (sourcedata.id === processKey) {
+const tagColor = [
+  'magenta',
+  'volcano',
+  'orange',
+  'gold',
+  'green',
+  'cyan',
+  'geekblue',
+  'purple',
+  'red',
+  'lime',
+];
+
+const genExtra = (currentIndex, processKey) => {
+  if (currentIndex === processKey) {
     return <Tag color={'green'}>processing</Tag>;
   }
 
-  if (sourcedata.id > processKey) {
+  if (currentIndex > processKey) {
     return <Tag color={'orange'}>wait</Tag>;
   }
 
-  if (sourcedata.id < processKey) {
+  if (currentIndex < processKey) {
     return <Tag color={'default'}>finish</Tag>;
   }
+};
+
+const currentKey = (chaptersArr, itemIndex) => {
+  return chaptersArr[itemIndex].id;
 };
 
 export async function getServerSideProps(context) {
@@ -59,12 +76,10 @@ export default function CourseDetail(props) {
   const [leftInfo, setLeftInfo] = useState([]);
   const [processKey, setProcessKey] = useState(0);
   const [data, setData] = useState();
-  console.log(router);
 
   useEffect(() => {
     const id = router.query.id || props.id;
     apiService.getCourseDetail({ id }).then((res) => {
-      console.log('res', res);
       const data = res.data;
 
       if (data) {
@@ -85,12 +100,12 @@ export default function CourseDetail(props) {
   }, []);
 
   // return <div>this is detail page</div>;
-
+  //bodyStyle={{ paddingBottom: 0 }}
   return (
     <APPLayout>
       <Row gutter={[30, 16]}>
         <Col span={8}>
-          <CourseOverview {...data}>
+          <CourseOverview {...data} cardCss={{ bodyStyle: { paddingBottom: 0 } }}>
             <StyledRow gutter={[6, 16]} justify="space-between" align="middle">
               {leftInfo.map((item, index) => (
                 <StyledCol span={6} key={index}>
@@ -102,7 +117,7 @@ export default function CourseDetail(props) {
           </CourseOverview>
         </Col>
 
-        {/* <Col span={16}>
+        <Col span={16}>
           <Card>
             <h2 style={{ color: '#624AEB' }}>Course Detail</h2>
 
@@ -112,10 +127,10 @@ export default function CourseDetail(props) {
             <h3>Start Time</h3>
             <Row>{data?.startTime}</Row>
 
-            <Badge color="#87d068" offset={[5, 24]}>
+            <Badge color="#87d068" offset={[5, 10]}>
               <h3>Status</h3>
             </Badge>
-            <Steps current={processKey}>
+            <Steps current={processKey} size="small">
               {data?.schedule.chapters.map((item) => (
                 <Steps.Step title={item.name} key={item.id} />
               ))}
@@ -125,22 +140,32 @@ export default function CourseDetail(props) {
             <Row>{data?.uid}</Row>
 
             <h3>Class Time</h3>
-            <WeekCalendar data={data?.schedule.classTime} />
+            {!!data?.schedule.classTime ? (
+              <WeekCalendar data={data.schedule.classTime} />
+            ) : (
+              <div>wait for class Time arrange</div>
+            )}
 
             <h3>Category</h3>
-            <Tag color="processing">{data?.typeName}</Tag>
+            {data?.type.map((item, index) => (
+              <Tag color={tagColor[index]} key={index}>
+                {item.name}
+              </Tag>
+            ))}
 
             <h3>Description</h3>
             {!!data?.detail ? <Row>{data.detail}</Row> : <Row>no detail</Row>}
 
             <h3>Chapter</h3>
             {data?.schedule && (
-              <Collapse defaultActiveKey={data?.schedule.current}>
-                {data?.schedule.chapters.map((item) => (
+              <Collapse
+                defaultActiveKey={currentKey(data?.schedule.chapters, data?.schedule.current)}
+              >
+                {data?.schedule.chapters.map((item, index) => (
                   <Collapse.Panel
                     key={item.id}
                     header={item.name}
-                    extra={genExtra(item, data.schedule.current)}
+                    extra={genExtra(index, data.schedule.current)}
                   >
                     <p>{item.content}</p>
                   </Collapse.Panel>
@@ -148,7 +173,7 @@ export default function CourseDetail(props) {
               </Collapse>
             )}
           </Card>
-        </Col> */}
+        </Col>
       </Row>
     </APPLayout>
   );

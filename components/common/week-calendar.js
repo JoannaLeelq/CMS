@@ -5,10 +5,7 @@ export default function WeekCalendar(props) {
   if (!props) {
     return <></>;
   }
-
   const { data } = props;
-  console.log('weekCalendar props:', props);
-  console.log(data);
 
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
