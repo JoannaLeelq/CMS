@@ -33,6 +33,13 @@ const StyledRow = styled(Row)`
   margin: 0 -24px 0 -24px !important;
 `;
 
+const StepsRow = styled(Row)`
+  overflow-x: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
 const tagColor = [
   'magenta',
   'volcano',
@@ -77,10 +84,13 @@ export default function CourseDetail(props) {
   const [processKey, setProcessKey] = useState(0);
   const [data, setData] = useState();
 
+  const { Step } = Steps;
+
   useEffect(() => {
     const id = router.query.id || props.id;
     apiService.getCourseDetail({ id }).then((res) => {
       const data = res.data;
+      console.log(data);
 
       if (data) {
         const sales = res.data.sales;
@@ -99,12 +109,10 @@ export default function CourseDetail(props) {
     });
   }, []);
 
-  // return <div>this is detail page</div>;
-  //bodyStyle={{ paddingBottom: 0 }}
   return (
     <APPLayout>
       <Row gutter={[30, 16]}>
-        <Col span={8}>
+        <Col xs={24} sm={24} md={8}>
           <CourseOverview {...data} cardCss={{ bodyStyle: { paddingBottom: 0 } }}>
             <StyledRow gutter={[6, 16]} justify="space-between" align="middle">
               {leftInfo.map((item, index) => (
@@ -117,7 +125,7 @@ export default function CourseDetail(props) {
           </CourseOverview>
         </Col>
 
-        <Col span={16}>
+        <Col xs={24} sm={24} md={16}>
           <Card>
             <h2 style={{ color: '#624AEB' }}>Course Detail</h2>
 
@@ -130,21 +138,25 @@ export default function CourseDetail(props) {
             <Badge color="#87d068" offset={[5, 10]}>
               <h3>Status</h3>
             </Badge>
-            <Steps current={processKey} size="small">
-              {data?.schedule.chapters.map((item) => (
-                <Steps.Step title={item.name} key={item.id} />
-              ))}
-            </Steps>
+            <StepsRow>
+              <Steps current={processKey} size="small" style={{ width: 'auto' }}>
+                {data?.schedule.chapters.map((item) => (
+                  <Steps.Step title={item.name} key={item.id} />
+                ))}
+              </Steps>
+            </StepsRow>
 
             <h3>Course Code</h3>
             <Row>{data?.uid}</Row>
 
             <h3>Class Time</h3>
-            {!!data?.schedule.classTime ? (
-              <WeekCalendar data={data.schedule.classTime} />
-            ) : (
-              <div>wait for class Time arrange</div>
-            )}
+            <Row>
+              {!!data?.schedule.classTime ? (
+                <WeekCalendar data={data.schedule.classTime} />
+              ) : (
+                <div>wait for class Time arrange</div>
+              )}
+            </Row>
 
             <h3>Category</h3>
             {data?.type.map((item, index) => (

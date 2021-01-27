@@ -161,15 +161,17 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    apiService.getAllCountries().then((res) => {
+      setCountries(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
     const req = {
       page: pagination.current,
       limit: pagination.pageSize,
       query,
     };
-
-    apiService.getAllCountries().then((res) => {
-      setCountries(res.data);
-    });
 
     apiService.getStudent(req).then((res) => {
       setData(res.data.students);

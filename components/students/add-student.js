@@ -54,8 +54,10 @@ export default function AddStudentForm(props) {
 
       <Form.Item label="Area" name="country" rules={[{ required: true }]}>
         <Select>
-          {countries.map((item) => (
-            <Select.Option value={item.en}>{item.en}</Select.Option>
+          {countries.map((item, index) => (
+            <Select.Option value={item.en} key={index}>
+              {item.en}
+            </Select.Option>
           ))}
         </Select>
       </Form.Item>

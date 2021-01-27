@@ -16,7 +16,6 @@ import { routes } from '../../lib/constant/routes';
 import { useUserType } from '../custom-hooks/loginState';
 import storage from '../../lib/services/storage';
 import { generateKey, getActiveKey } from '../../lib/util/side-nav';
-import { replace } from 'lodash';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import AppBreadcrumb from '../breadcrumb';
 
@@ -64,6 +63,7 @@ const StyledContent = styled(Content)`
 
 const getMenuConfig = (data) => {
   const key = getActiveKey(data);
+  console.log(key);
   const defaultSelectedKeys = key.split('/').pop();
   const defaultOpenKeys = key.split('/').slice(0, -1);
 

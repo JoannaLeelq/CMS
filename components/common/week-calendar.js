@@ -84,6 +84,7 @@ export default function WeekCalendar(props) {
       columns={columns}
       dataSource={[new Array(7).fill({ id: 0 })]}
       pagination={false}
+      tableLayout="fixed"
     ></Table>
   );
 }
