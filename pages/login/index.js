@@ -37,7 +37,7 @@ export default function Login() {
       <Col>
         <Form
           name="login"
-          initialValues={{
+          initialValue={{
             remember: true,
             role: 'student',
           }}
@@ -48,7 +48,6 @@ export default function Login() {
 
           <Form.Item
             name="role"
-            initialValues="student"
             rules={[
               {
                 required: true,

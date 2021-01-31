@@ -1,6 +1,6 @@
 const token = {
   token:
     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
-      .eyJlbWFpbCI6Im1hbmFnZXJAYWRtaW4uY29tIiwicm9sZSI6Im1hbmFnZXIiLCJpZCI6MywiaWF0IjoxNjExNjE3NzQyLCJleHAiOjE2MTkzOTM3NDJ9
-      .XmGr9gMQ1OkAbda0ekTjm0szooxtMZlqeGUanXTfA5w,
+      .eyJlbWFpbCI6Im1hbmFnZXJAYWRtaW4uY29tIiwicm9sZSI6Im1hbmFnZXIiLCJpZCI6MywiaWF0IjoxNjExOTY2OTA2LCJleHAiOjE2MTk3NDI5MDZ9
+      .yRetl_SV8SAPnAb6EByqSk54DbflWWc - iIjYxT8qdfA,
 };
