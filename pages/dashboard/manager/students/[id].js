@@ -103,10 +103,11 @@ export default function DetailPage(props) {
     },
   ];
 
-  const coursesDataSource = courseInfo.map((item) => ({
-    name: item.courseName,
-    type: item.type,
-    joinTime: item.ctime,
+  const coursesDataSource = courseInfo.map((item, index) => ({
+    key: index,
+    name: item.name,
+    type: item.type.length > 0 && item.type.map((singleType) => singleType.name).join(','),
+    joinTime: item.createdAt,
   }));
 
   const onTabChange = (key, type) => {
@@ -116,6 +117,7 @@ export default function DetailPage(props) {
   useEffect(() => {
     const id = router.query.id || props.id;
     apiService.getStudentProfile({ id }).then((res) => {
+      console.log('student', res);
       setData(res.data);
       const left = [
         { label: 'Name', value: res.data.name },

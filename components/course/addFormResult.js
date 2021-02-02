@@ -1,16 +1,25 @@
 import { Result, Button } from 'antd';
+import { useRouter } from 'next/router';
 
 export default function AddFormResult() {
+  const router = useRouter();
+
   return (
     <Result
       status="success"
-      title="Successfully Purchased Cloud Server ECS!"
-      subTitle="Order number: 2017182818828182881 Cloud server configuration takes 1-5 minutes, please wait."
+      title="Successfully Create Course!"
       extra={[
-        <Button type="primary" key="console">
-          Go Console
+        <Button type="primary" key="detail" onClick={() => router.push('/dashboard/')}>
+          Go Course
         </Button>,
-        <Button key="buy">Buy Again</Button>,
+        <Button
+          key="again"
+          onClick={() => {
+            router.reload();
+          }}
+        >
+          Create Again
+        </Button>,
       ]}
     />
   );

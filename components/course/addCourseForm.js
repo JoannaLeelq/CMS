@@ -21,9 +21,74 @@ import apiService from '../../lib/services/api-service';
 import NumberWithUnit from '../common/number-unit';
 import { fil } from 'date-fns/locale';
 import { format } from 'date-fns';
+import styles from '../../styles/components/addCourse.module.css';
 
+// css part
 const StyledFormItem = styled(Form.Item)`
   display: block;
+`;
+
+const UploadCover = styled(Form.Item)`
+  display: block;
+  .ant-form-item-control {
+    position: absolute;
+    inset: 0;
+    top: 37px;
+    bottom: 30px;
+  }
+
+  .ant-upload-picture-card-wrapper,
+  .ant-form-item-control-input,
+  .ant-form-item-control-input div {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ant-upload-picture-card-wrapper,
+  .ant-upload-list-picture-card {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ant-upload-select-picture-card {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ant-upload-list-item-progress,
+  .ant-tooltip {
+    height: auto !important;
+    .ant-tooltip-arrow {
+      height: 13px;
+    }
+  }
+
+  .ant-upload-list-item-actions {
+    .anticon-delete {
+      color: red;
+    }
+  }
+
+  .ant-upload-list-picture-card img {
+    object-fit: cover !important;
+  }
+`;
+
+const UploadInner = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgb(240, 240, 240);
+  width: 100%;
+  .anticon {
+    font-size: 44px;
+    color: #1890ff;
+  }
+  p {
+    font-size: 24px;
+    color: #999;
+  }
 `;
 
 export default function AddCourseForm({ course, onSuccess }) {
@@ -34,7 +99,7 @@ export default function AddCourseForm({ course, onSuccess }) {
   const [type, setType] = useState([]);
   const [isCodeDisplay, setIsCodeDisplay] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [isAdd, setIsAdd] = useState(course === undefined);
+  const [isAdd, setIsAdd] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [preview, setPreview] = useState();
 
@@ -50,14 +115,15 @@ export default function AddCourseForm({ course, onSuccess }) {
   // for course code
   const getCode = () => {
     apiService.getCourseCodes().then((res) => {
-      form.setFieldsValue({ courseCode: res.data });
+      form.setFieldsValue({ uid: res.data });
       setIsCodeDisplay(false);
     });
   };
 
   // type
   const selectType = () => {
-    getCode();
+    console.log('type should be multiplier');
+    // getCode();
   };
 
   // cover
@@ -90,40 +156,45 @@ export default function AddCourseForm({ course, onSuccess }) {
       previewImage: src,
       previewTitle: file.name,
     });
-    // const imgWindow = window.open(src);
-    // imgWindow.document.write(image.outerHTML);
   };
 
-  const finishForm = async (formContent) => {
-    console.log(formContent);
-    if (!isAdd && !course) {
-      message.error('you must select a course to update!');
-      return;
+  const finishForm = (formContent) => {
+    const addCourseRequest = {
+      name: formContent?.name,
+      teacher: formContent?.teacherId,
+      uid: formContent?.uid,
+      startTime: formContent?.startTime,
+      price: formContent?.price,
+      maxStudents: formContent?.maxStudents,
+      duration: formContent?.durationPart.duration,
+      durationUnit: formContent?.durationPart.durationUnit,
+      cover: formContent?.cover,
+    };
+
+    if (!!formContent) {
+      setIsAdd(false);
     }
 
-    const addCourseRequest = {
-      name: formContent.name,
-      teacher: formContent.teacherId,
-      uid: formContent.uid,
-      startTime: formContent.startTime && format(formContent.startTime, 'yyyy-MM-dd'),
-      price: formContent.price,
-      maxStudents: formContent.maxStudents,
-      duration: formContent.durationPart.duration,
-      durationUnit: formContent.durationPart.durationUnit,
-      cover: formContent.cover,
-    };
+    if (!!onSuccess) {
+      onSuccess(addCourseRequest);
+    }
   };
 
   // 仅需要一次
   useEffect(() => {
+    // get course code
+    if (isAdd) {
+      getCode();
+    }
+
     apiService.getCourseTypes().then((res) => {
       setType(res.data);
     });
   }, []);
 
   return (
-    <div>
-      <Form form={form} onFinish={(formContent) => finishForm(formContent)}>
+    <div className="courseDetail">
+      <Form form={form} onFinish={finishForm}>
         {/* the first row */}
         <Row gutter={gutterValue}>
           <Col xs={24} sm={24} md={8}>
@@ -167,8 +238,8 @@ export default function AddCourseForm({ course, onSuccess }) {
               </Col>
 
               <Col xs={24} sm={24} md={8}>
-                <StyledFormItem label="Type" name="uid" rules={[{ required: true }]}>
-                  <Select onSelect={selectType}>
+                <StyledFormItem label="Type" name="type" rules={[{ required: true }]}>
+                  <Select mode="multiple" onSelect={selectType}>
                     {type.map((item) => (
                       <Option key={item.id} value={item.name}>
                         {item.name}
@@ -179,7 +250,7 @@ export default function AddCourseForm({ course, onSuccess }) {
               </Col>
 
               <Col xs={24} sm={24} md={8}>
-                <StyledFormItem label="Course Code" name="courseCode" rules={[{ required: true }]}>
+                <StyledFormItem label="Course Code" name="uid" rules={[{ required: true }]}>
                   <Input
                     type="text"
                     placeholder="Course Code"
@@ -199,7 +270,7 @@ export default function AddCourseForm({ course, onSuccess }) {
           <Col xs={24} sm={24} md={8}>
             <StyledFormItem label="Start Date" name="startTime">
               <DatePicker
-                format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
                 disabledDate={disabledDate}
                 style={{ width: '100%' }}
               />
@@ -226,14 +297,14 @@ export default function AddCourseForm({ course, onSuccess }) {
                   noStyle
                   rules={[{ required: true, message: 'duration is required' }]}
                 >
-                  <Input style={{ width: '85%' }} />
+                  <Input style={{ width: '80%' }} />
                 </Form.Item>
                 <Form.Item
                   name={['durationPart', 'durationUnit']}
                   noStyle
                   // rules={[{ required: true, message: 'duration is required' }]}
                 >
-                  <Select defaultValue={durationUnits} style={{ width: '15%' }}>
+                  <Select defaultValue={durationUnits} style={{ width: '20%' }}>
                     {durationUnits.map((item, index) => (
                       <Option key={index} value={index}>
                         {item}
@@ -259,32 +330,41 @@ export default function AddCourseForm({ course, onSuccess }) {
                       message: 'Description length must between 100 - 1000 characters.',
                     },
                   ]}
-                  style={{ height: '100%', border: '1px solid' }}
+                  style={{ height: '100%' }}
+                  className={styles.descript}
                 >
-                  <TextArea placeholder="Course description" style={{ height: '100%' }} />
+                  <TextArea placeholder="Course description" rows={13} style={{ height: '100%' }} />
                 </StyledFormItem>
               </Col>
 
               {/* cover */}
-              <Col xs={24} sm={24} md={12} style={{ height: '100%' }}>
-                <StyledFormItem label="Cover" name="cover">
+              <Col xs={24} sm={24} md={12}>
+                <UploadCover
+                  label="Cover"
+                  name="cover"
+                  className="cover"
+                  style={{ width: '100%', height: '84%' }}
+                >
                   <ImgCrop rotate aspect={16 / 9}>
                     <Upload
                       action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                       listType="picture-card"
                       onChange={onChange}
                       onPreview={onPreview}
+                      style={{ width: '100%', height: '100%', border: '1px solid' }}
                     >
                       {fileList.length >= 1 ? null : (
-                        <div>
-                          <InboxOutlined />
+                        <UploadInner>
+                          <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                          </p>
 
                           <p>Click or drag file to this area to upload</p>
-                        </div>
+                        </UploadInner>
                       )}
                     </Upload>
                   </ImgCrop>
-                </StyledFormItem>
+                </UploadCover>
 
                 {isUploading && (
                   <CloseCircleOutlined
@@ -292,7 +372,13 @@ export default function AddCourseForm({ course, onSuccess }) {
                       setIsUploading(false);
                       setFileList([]);
                     }}
-                    style={{ position: 'absolute', top: '0px', right: '0px' }}
+                    style={{
+                      position: 'absolute',
+                      top: '1em',
+                      right: '-10px',
+                      color: 'red',
+                      fontSize: '24px',
+                    }}
                   />
                 )}
               </Col>
