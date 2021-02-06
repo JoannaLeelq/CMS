@@ -18,6 +18,7 @@ export default function AppBreadcrumb() {
   const sub = paths.slice(2);
   const sideNav = routes[userType];
   const sideNames = getSideNavNameByPath(sideNav, path);
+  console.log('sideNames', sideNames);
 
   return (
     <Breadcrumb style={{ margin: '0 16px', padding: 16 }}>
@@ -26,7 +27,7 @@ export default function AppBreadcrumb() {
       </Breadcrumb.Item>
 
       {sideNames.map((item, index) => {
-        console.log(item);
+        // console.log(item);
         if (item === 'Detail') {
           return <Breadcrumb.Item key={index}>Detail</Breadcrumb.Item>;
         }
@@ -47,13 +48,12 @@ export default function AppBreadcrumb() {
           { source: sideNav, navs: [] }
         );
 
-        console.log(navs);
         const subPath = navs
           .map((item) => item.path)
           .reduce((acc, cur) => [...acc, ...cur], [])
           .filter((item) => !!item)
           .join('/');
-        console.log(subPath);
+
         const isText = index === sideNames.length - 1;
 
         return (
