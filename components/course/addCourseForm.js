@@ -112,6 +112,12 @@ export default function AddCourseForm({ course, onSuccess }) {
     return current && current < moment().endOf('day');
   };
 
+  const formatStartTime = (value) =>
+    `${value.getFullYear()}-${value.getMonth() + 1}-${value.getDate()}`;
+
+  // get type id
+  const getTypeId = (value) => type.find((element) => element.name === value).id;
+
   // for course code
   const getCode = () => {
     apiService.getCourseCodes().then((res) => {
@@ -120,16 +126,8 @@ export default function AddCourseForm({ course, onSuccess }) {
     });
   };
 
-  // type
-  const selectType = () => {
-    console.log('type should be multiplier');
-    // getCode();
-  };
-
   // cover
   const onChange = ({ fileList: newFileList, file }) => {
-    console.log('file', file);
-
     if (file?.thumbUrl) {
       form.setFieldsValue({ cover: file.thumbUrl });
     } else {
@@ -158,29 +156,43 @@ export default function AddCourseForm({ course, onSuccess }) {
     });
   };
 
-  const finishForm = (formContent) => {
+  const closeUploadingImg = () => {
+    form.setFieldsValue({ cover: '' });
+    setIsUploading(false);
+    setFileList([]);
+    console.log(fileList);
+  };
+
+  const finishForm = async (formContent) => {
     const addCourseRequest = {
       name: formContent?.name,
-      teacher: formContent?.teacherId,
       uid: formContent?.uid,
-      startTime: formContent?.startTime,
+      detail: formContent?.description,
+      startTime: formContent && formatStartTime(formContent.startTime._d),
       price: formContent?.price,
       maxStudents: formContent?.maxStudents,
-      duration: formContent?.durationPart.duration,
+      duration: formContent && parseInt(formContent.durationPart.duration),
       durationUnit: formContent?.durationPart.durationUnit,
       cover: formContent?.cover,
+      teacherId: formContent?.teacherId,
+      type: formContent?.type.map((item) => getTypeId(item)),
     };
 
-    if (!!formContent) {
+    const response = isAdd
+      ? apiService.addCourse(addCourseRequest)
+      : apiService.updateCourse({ ...addCourseRequest, id: course?.id });
+
+    const { data } = await response;
+    console.log(data);
+    if (!!data) {
       setIsAdd(false);
     }
 
     if (!!onSuccess) {
-      onSuccess(addCourseRequest);
+      onSuccess(data);
     }
   };
 
-  // 仅需要一次
   useEffect(() => {
     // get course code
     if (isAdd) {
@@ -239,7 +251,7 @@ export default function AddCourseForm({ course, onSuccess }) {
 
               <Col xs={24} sm={24} md={8}>
                 <StyledFormItem label="Type" name="type" rules={[{ required: true }]}>
-                  <Select mode="multiple" onSelect={selectType}>
+                  <Select mode="multiple">
                     {type.map((item) => (
                       <Option key={item.id} value={item.name}>
                         {item.name}
@@ -270,7 +282,7 @@ export default function AddCourseForm({ course, onSuccess }) {
           <Col xs={24} sm={24} md={8}>
             <StyledFormItem label="Start Date" name="startTime">
               <DatePicker
-                format="YYYY-MM-DD"
+                format="DD/MM/YYYY"
                 disabledDate={disabledDate}
                 style={{ width: '100%' }}
               />
@@ -304,7 +316,7 @@ export default function AddCourseForm({ course, onSuccess }) {
                   noStyle
                   // rules={[{ required: true, message: 'duration is required' }]}
                 >
-                  <Select defaultValue={durationUnits} style={{ width: '20%' }}>
+                  <Select defaultValue={durationUnits[0]} style={{ width: '20%' }}>
                     {durationUnits.map((item, index) => (
                       <Option key={index} value={index}>
                         {item}
@@ -331,7 +343,6 @@ export default function AddCourseForm({ course, onSuccess }) {
                     },
                   ]}
                   style={{ height: '100%' }}
-                  className={styles.descript}
                 >
                   <TextArea placeholder="Course description" rows={13} style={{ height: '100%' }} />
                 </StyledFormItem>
@@ -349,6 +360,7 @@ export default function AddCourseForm({ course, onSuccess }) {
                     <Upload
                       action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                       listType="picture-card"
+                      fileList={fileList}
                       onChange={onChange}
                       onPreview={onPreview}
                       style={{ width: '100%', height: '100%', border: '1px solid' }}
@@ -368,10 +380,7 @@ export default function AddCourseForm({ course, onSuccess }) {
 
                 {isUploading && (
                   <CloseCircleOutlined
-                    onClick={() => {
-                      setIsUploading(false);
-                      setFileList([]);
-                    }}
+                    onClick={closeUploadingImg}
                     style={{
                       position: 'absolute',
                       top: '1em',

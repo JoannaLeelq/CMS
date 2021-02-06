@@ -10,26 +10,34 @@ const { Step } = Steps;
 
 export default function AddCoursePage() {
   const [step, setStep] = useState(0);
-  const [course, setCourse] = useState([]);
-  const [availableNavigate, setAvailableNavigate] = useState([0]);
+  const [courseId, setCourseId] = useState(0);
+  const [scheduleId, setScheduleId] = useState(0);
+  const [currentStep, setCurrentStep] = useState([0]);
+  const [course, setCourse] = useState(null);
 
   const next = () => {
     setStep(step + 1);
+    setCurrentStep([...currentStep, step + 1]);
   };
 
   const steps = [
     <AddCourseForm
+      course={course}
       onSuccess={(courseDetail) => {
         setCourse(courseDetail);
+        setCourseId(courseDetail.id);
+        setScheduleId(courseDetail.scheduleId);
         next();
       }}
     />,
     <CourseSchedule
+      courseId={courseId}
+      scheduleId={scheduleId}
       onSuccess={() => {
         next();
       }}
     />,
-    <AddFormResult />,
+    <AddFormResult courseId={courseId} />,
   ];
 
   return (
@@ -38,7 +46,9 @@ export default function AddCoursePage() {
         current={step}
         type="navigation"
         onChange={(current) => {
-          setStep(current);
+          if (currentStep.includes(current)) {
+            setStep(current);
+          }
         }}
       >
         <Step title="Course Detail" />

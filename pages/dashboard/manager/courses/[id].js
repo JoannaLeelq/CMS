@@ -90,7 +90,6 @@ export default function CourseDetail(props) {
     const id = router.query.id || props.id;
     apiService.getCourseDetail({ id }).then((res) => {
       const data = res.data;
-      console.log(data);
 
       if (data) {
         const sales = res.data.sales;

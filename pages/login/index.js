@@ -25,7 +25,7 @@ export default function Login() {
 
   const login = async (loginValues) => {
     const { data } = await apiService.login(loginValues);
-    console.log(data);
+
     if (!!data) {
       storage.setUserInfo(data);
       router.push(`/dashboard/${data.role}`);

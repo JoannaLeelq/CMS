@@ -1,41 +1,71 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Row, Col, TimePicker, Select, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { format } from 'date-fns';
+import apiService from '../../lib/services/api-service';
 
-export default function CourseSchedule(onSuccess) {
+export default function CourseSchedule({ courseId, scheduleId, onSuccess }) {
   const [form] = Form.useForm();
   const gutterValue = [24, 16];
   const [selectedWeekdays, setSelectedWeekdays] = useState([]);
   const [isAdd, setIsAdd] = useState(true);
+  const [time, setTime] = useState(null);
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const { Option } = Select;
 
   const initialValues = {
-    chapter: [{ name: '', content: '' }],
+    chapters: [{ name: '', content: '' }],
     classTime: [{ weekday: '', time: '' }],
   };
 
+  const onChange = (time) => {
+    setTime(time);
+  };
+
   const finishForm = (chapterSchedule) => {
-    console.log(chapterSchedule);
+    if (!courseId && !scheduleId) {
+      message.error('You must select a course to update!');
+      return;
+    }
+
+    // handle chapter and classTime
+    const { chapters, classTime } = chapterSchedule;
+    const formattedClassTime = classTime.map(({ weekday, time }) => {
+      return `${weekday} ${time._d.getHours()}:${time._d.getMinutes()}:${time._d.getSeconds()}`;
+    });
+
     const courseSchedule = {
-      detail: chapterSchedule,
+      scheduleId: scheduleId,
+      courseId: courseId,
+      current: 0,
+      status: 0,
+      chapters: chapters.map((item, index) => ({ ...item, order: index + 1 })),
+      classTime: formattedClassTime,
     };
 
     if (!!chapterSchedule) {
       setIsAdd(false);
     }
 
-    console.log(onSuccess);
-    if (!!onSuccess) {
-      onSuccess();
-    }
+    apiService.updateSchedule(courseSchedule).then((res) => {
+      if (!!onSuccess && res.data) {
+        onSuccess();
+      }
+    });
   };
 
   useEffect(() => {
-    if (isAdd) {
+    if (!scheduleId) {
       return;
     }
-  }, []);
+
+    const { data } = apiService.getScheduleById({ courseId, scheduleId });
+    console.log(data);
+
+    if (!!data) {
+      // const classTime
+    }
+  }, [scheduleId]);
 
   // when delete weekday update it
   const updateSelectedWeekdays = (value) => {
@@ -53,7 +83,7 @@ export default function CourseSchedule(onSuccess) {
         <Row gutter={gutterValue}>
           <Col xs={24} sm={24} md={12}>
             <h2>Chapter Detail</h2>
-            <Form.List name="chapter">
+            <Form.List name="chapters">
               {(fields, { add, remove }) => (
                 <>
                   {fields.map((field) => (
@@ -123,7 +153,6 @@ export default function CourseSchedule(onSuccess) {
                             onChange={(value) => setSelectedWeekdays([...selectedWeekdays, value])}
                           >
                             {weekdays.map((day, index) => {
-                              // console.log(day);
                               return (
                                 <Option
                                   key={index}
@@ -146,7 +175,13 @@ export default function CourseSchedule(onSuccess) {
                           fieldKey={[field.fieldKey, 'time']}
                           rules={[{ required: true, message: 'Missing class time' }]}
                         >
-                          <TimePicker size="large" style={{ width: '100%' }} />
+                          <TimePicker
+                            value={time}
+                            format="HH:mm:ss"
+                            onChange={onChange}
+                            size="large"
+                            style={{ width: '100%' }}
+                          />
                         </Form.Item>
                       </Col>
 
@@ -166,7 +201,15 @@ export default function CourseSchedule(onSuccess) {
                   ))}
 
                   <Form.Item>
-                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    <Button
+                      type="dashed"
+                      onClick={() => {
+                        updateSelectedWeekdays();
+                        add();
+                      }}
+                      block
+                      icon={<PlusOutlined />}
+                    >
                       Add Class Time
                     </Button>
                   </Form.Item>
