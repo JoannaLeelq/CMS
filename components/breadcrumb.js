@@ -18,7 +18,6 @@ export default function AppBreadcrumb() {
   const sub = paths.slice(2);
   const sideNav = routes[userType];
   const sideNames = getSideNavNameByPath(sideNav, path);
-  console.log('sideNames', sideNames);
 
   return (
     <Breadcrumb style={{ margin: '0 16px', padding: 16 }}>

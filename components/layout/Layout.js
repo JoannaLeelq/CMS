@@ -63,7 +63,6 @@ const StyledContent = styled(Content)`
 
 const getMenuConfig = (data) => {
   const key = getActiveKey(data);
-  console.log(key);
   const defaultSelectedKeys = key.split('/').pop();
   const defaultOpenKeys = key.split('/').slice(0, -1);
 

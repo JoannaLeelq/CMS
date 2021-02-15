@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Row, Col, TimePicker, Select, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
+import moment from 'moment';
 import apiService from '../../lib/services/api-service';
 
-export default function CourseSchedule({ courseId, scheduleId, onSuccess }) {
+export default function CourseSchedule({ courseId, scheduleId, onSuccess, isAdd }) {
   const [form] = Form.useForm();
   const gutterValue = [24, 16];
   const [selectedWeekdays, setSelectedWeekdays] = useState([]);
-  const [isAdd, setIsAdd] = useState(true);
   const [time, setTime] = useState(null);
   const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const { Option } = Select;
@@ -43,28 +43,34 @@ export default function CourseSchedule({ courseId, scheduleId, onSuccess }) {
       classTime: formattedClassTime,
     };
 
-    if (!!chapterSchedule) {
-      setIsAdd(false);
-    }
-
     apiService.updateSchedule(courseSchedule).then((res) => {
       if (!!onSuccess && res.data) {
-        onSuccess();
+        onSuccess(true);
       }
     });
   };
 
   useEffect(() => {
-    if (!scheduleId) {
+    if (!scheduleId || isAdd) {
       return;
     }
 
-    const { data } = apiService.getScheduleById({ courseId, scheduleId });
-    console.log(data);
+    apiService.getScheduleById({ courseId, scheduleId }).then((res) => {
+      const { data } = res;
 
-    if (!!data) {
-      // const classTime
-    }
+      if (!!data && data.classTime) {
+        // const classTime
+        const classTimes = data?.classTime.map((item) => {
+          const [weekday, time] = item.split(' ');
+
+          const t = moment(time, 'HH,mm, ss');
+          return { weekday, time: t };
+        });
+
+        form.setFieldsValue({ chapters: data.chapters, classTime: classTimes });
+        setSelectedWeekdays(classTimes.map((item) => item.weekday));
+      }
+    });
   }, [scheduleId]);
 
   // when delete weekday update it

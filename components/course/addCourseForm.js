@@ -19,9 +19,8 @@ import { InboxOutlined, KeyOutlined, CloseCircleOutlined } from '@ant-design/ico
 import styled from 'styled-components';
 import apiService from '../../lib/services/api-service';
 import NumberWithUnit from '../common/number-unit';
-import { fil } from 'date-fns/locale';
-import { format } from 'date-fns';
 import styles from '../../styles/components/addCourse.module.css';
+import { getBase64 } from '../../lib/util/base64';
 
 // css part
 const StyledFormItem = styled(Form.Item)`
@@ -102,10 +101,9 @@ export default function AddCourseForm({ course, onSuccess }) {
   const [isAdd, setIsAdd] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [preview, setPreview] = useState();
-
   const { Option } = Select;
   const { TextArea } = Input;
-  const durationUnits = ['hour', 'day', 'week', 'month', 'year'];
+  const durationUnits = ['year', 'month', 'day', 'week', 'hour'];
 
   // for start date
   const disabledDate = (current) => {
@@ -128,11 +126,12 @@ export default function AddCourseForm({ course, onSuccess }) {
 
   // cover
   const onChange = ({ fileList: newFileList, file }) => {
-    if (file?.thumbUrl) {
-      form.setFieldsValue({ cover: file.thumbUrl });
+    if (file?.status === 'done') {
+      form.setFieldsValue({ cover: file.response.url });
     } else {
       form.setFieldsValue({ cover: course?.cover || '' });
     }
+
     setIsUploading(file.status === 'uploading');
     setFileList(newFileList);
   };
@@ -160,7 +159,6 @@ export default function AddCourseForm({ course, onSuccess }) {
     form.setFieldsValue({ cover: '' });
     setIsUploading(false);
     setFileList([]);
-    console.log(fileList);
   };
 
   const finishForm = async (formContent) => {
@@ -183,12 +181,12 @@ export default function AddCourseForm({ course, onSuccess }) {
       : apiService.updateCourse({ ...addCourseRequest, id: course?.id });
 
     const { data } = await response;
-    console.log(data);
+
     if (!!data) {
       setIsAdd(false);
     }
 
-    if (!!onSuccess) {
+    if (!!onSuccess && !!data) {
       onSuccess(data);
     }
   };
@@ -203,6 +201,28 @@ export default function AddCourseForm({ course, onSuccess }) {
       setType(res.data);
     });
   }, []);
+
+  // edit course
+  useEffect(() => {
+    if (!!course) {
+      setIsAdd(false);
+      const values = {
+        name: course.name,
+        uid: course.uid,
+        description: course.detail,
+        startTime: course.startTime && moment(course.startTime, 'YYYY-MM-DD'),
+        price: course.price,
+        maxStudents: course.maxStudents,
+        durationPart: { duration: course.duration, durationUnit: course.durationUnit },
+        cover: course.cover,
+        teacherId: course.teacherName,
+        type: course.type.map((item) => item.name),
+      };
+
+      form.setFieldsValue(values);
+      // setFileList();
+    }
+  }, [course]);
 
   return (
     <div className="courseDetail">
@@ -280,9 +300,9 @@ export default function AddCourseForm({ course, onSuccess }) {
         {/* second row */}
         <Row gutter={gutterValue}>
           <Col xs={24} sm={24} md={8}>
-            <StyledFormItem label="Start Date" name="startTime">
+            <StyledFormItem label="Start Date" name="startTime" rules={[{ required: true }]}>
               <DatePicker
-                format="DD/MM/YYYY"
+                format="YYYY-MM-DD"
                 disabledDate={disabledDate}
                 style={{ width: '100%' }}
               />
@@ -316,7 +336,7 @@ export default function AddCourseForm({ course, onSuccess }) {
                   noStyle
                   // rules={[{ required: true, message: 'duration is required' }]}
                 >
-                  <Select defaultValue={durationUnits[0]} style={{ width: '20%' }}>
+                  <Select defaultValue={0} style={{ width: '20%' }}>
                     {durationUnits.map((item, index) => (
                       <Option key={index} value={index}>
                         {item}

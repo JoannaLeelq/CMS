@@ -117,7 +117,6 @@ export default function DetailPage(props) {
   useEffect(() => {
     const id = router.query.id || props.id;
     apiService.getStudentProfile({ id }).then((res) => {
-      console.log('student', res);
       setData(res.data);
       const left = [
         { label: 'Name', value: res.data.name },

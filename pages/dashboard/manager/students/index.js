@@ -3,15 +3,13 @@ import 'antd/dist/antd.css';
 import styled from 'styled-components';
 import { Input, Table, Space, Pagination, Button, Popconfirm, Breadcrumb } from 'antd';
 import React, { useState, useEffect, useCallback } from 'react';
-import Axios from 'axios';
 import apiService from '../../../../lib/services/api-service';
-import { debounce, omitBy, throttle } from 'lodash';
+import { debounce } from 'lodash';
 import Link from 'next/link';
 import { PlusOutlined } from '@ant-design/icons';
 import ModalForm from '../../../../components/common/modal-form';
 import AddStudentForm from '../../../../components/students/add-student';
 import { formatDistanceToNow } from 'date-fns';
-import { it } from 'date-fns/locale';
 
 const Search = styled(Input.Search)`
   width: 30%;
@@ -26,8 +24,6 @@ const FlexContainer = styled.div`
   margin-bottom: 16px;
 }
 `;
-
-const axios = require('axios');
 
 export default function Dashboard() {
   const [data, setData] = useState([]);

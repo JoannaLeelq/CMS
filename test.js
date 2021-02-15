@@ -1,16 +1,17 @@
-const Role = {
-  student: 'students',
-  teacher: 'teacher',
-  manager: 'manager',
-};
+function fib_impl(n, cont) {
+  return n < 1
+    ? cont(1)
+    : fib_impl.bind(null, n - 1, function (x) {
+        return fib_impl.bind(null, n - 2, function (y) {
+          return cont.bind(null, x + y);
+        });
+      });
+}
 
-const item = 'students';
-
-[Role.student, Role.manager, Role.teacher].find((role) => role === item)
-  ? console.log('find role')
-  : console.log('not find role');
-// console.log(result);
-
-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
-  .eyJlbWFpbCI6Im1hbmFnZXJAYWRtaW4uY29tIiwicm9sZSI6Im1hbmFnZXIiLCJpZCI6MywiaWF0IjoxNjExMzkyODk4LCJleHAiOjE2MTkxNjg4OTh9
-  .oaY2QnpFUwjJKwCxb_dQv5KYqeRcSVZVuSOmbFblfq0;
+function fib(n) {
+  return trampoline(
+    fib_impl.bind(null, n, function (r) {
+      return r;
+    })
+  );
+}
