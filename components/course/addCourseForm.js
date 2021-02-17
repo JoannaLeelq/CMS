@@ -21,6 +21,7 @@ import apiService from '../../lib/services/api-service';
 import NumberWithUnit from '../common/number-unit';
 import styles from '../../styles/components/addCourse.module.css';
 import { getBase64 } from '../../lib/util/base64';
+import { useForm } from 'antd/lib/form/Form';
 
 // css part
 const StyledFormItem = styled(Form.Item)`
@@ -91,7 +92,7 @@ const UploadInner = styled.div`
 `;
 
 export default function AddCourseForm({ course, onSuccess }) {
-  const [form] = Form.useForm();
+  const [form] = useForm();
   const gutterValue = [24, 16];
   const [teachers, setTeachers] = useState([]);
   const [isTeacherSearching, setIsTeacherSearching] = useState(false);
@@ -219,8 +220,16 @@ export default function AddCourseForm({ course, onSuccess }) {
         type: course.type.map((item) => item.name),
       };
 
+      const imageFile = {
+        uid: `${course.uid}`,
+        name: `${course.cover.split('/')[-1]}`,
+        url: `${course.cover}`,
+      };
+      setFileList([]);
+      fileList.push(imageFile);
+
       form.setFieldsValue(values);
-      // setFileList();
+      setFileList(fileList);
     }
   }, [course]);
 

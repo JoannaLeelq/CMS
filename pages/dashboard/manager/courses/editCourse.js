@@ -24,26 +24,29 @@ export default function EditCoursePage() {
       }
       setIsSearching(true);
 
-      apiService.getCourses({ [searchType]: searchContent }).then((res) => {
-        const { data } = res;
-        if (!!data) {
-          setResult(data.courses);
-        }
-      });
-
-      setIsSearching(false);
+      apiService
+        .getCourses({ [searchType]: searchContent })
+        .then((res) => {
+          const { data } = res;
+          if (!!data) {
+            setResult(data.courses);
+          }
+        })
+        .finally(() => setIsSearching(false));
     }, 1000),
     [searchType]
   );
 
   useEffect(() => {
-    apiService.getCourses({ [searchType]: target }).then((res) => {
-      const { data } = res;
+    if (!!target) {
+      apiService.getCourses({ [searchType]: target }).then((res) => {
+        const { data } = res;
 
-      if (!!data) {
-        setCourse(data.courses[0]);
-      }
-    });
+        if (!!data) {
+          setCourse(data.courses[0]);
+        }
+      });
+    }
   }, [target]);
 
   return (
