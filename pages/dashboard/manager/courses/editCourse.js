@@ -8,6 +8,7 @@ import AddCourseForm from '../../../../components/course/addCourseForm';
 import CourseSchedule from '../../../../components/course/courseSchedule';
 import apiService from '../../../../lib/services/api-service';
 
+const { Option } = Select;
 export default function EditCoursePage() {
   const { TabPane } = Tabs;
   const [searchType, setSearchType] = useState('uid');
@@ -28,6 +29,7 @@ export default function EditCoursePage() {
         .getCourses({ [searchType]: searchContent })
         .then((res) => {
           const { data } = res;
+
           if (!!data) {
             setResult(data.courses);
           }
@@ -39,7 +41,8 @@ export default function EditCoursePage() {
 
   useEffect(() => {
     if (!!target) {
-      apiService.getCourses({ [searchType]: target }).then((res) => {
+      const request = searchType != 'type' ? { [searchType]: target } : { name: target };
+      apiService.getCourses(request).then((res) => {
         const { data } = res;
 
         if (!!data) {
@@ -61,9 +64,9 @@ export default function EditCoursePage() {
                   setSearchType(value);
                 }}
               >
-                <Select.Option value="uid">Code</Select.Option>
-                <Select.Option value="name">Name</Select.Option>
-                <Select.Option value="type">Category</Select.Option>
+                <Option value="uid">Code</Option>
+                <Option value="name">Name</Option>
+                <Option value="type">Category</Option>
               </Select>
 
               <Select
@@ -79,8 +82,11 @@ export default function EditCoursePage() {
               >
                 {result.map((item) => {
                   return (
-                    <Select.Option key={item.id} value={item[searchType]}>
-                      {item[searchType]}
+                    <Select.Option
+                      key={item.id}
+                      value={searchType != 'type' ? item[searchType] : item.name}
+                    >
+                      {searchType != 'type' ? item[searchType] : item.name}
                     </Select.Option>
                   );
                 })}

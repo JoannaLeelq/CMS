@@ -225,11 +225,9 @@ export default function AddCourseForm({ course, onSuccess }) {
         name: `${course.cover.split('/')[-1]}`,
         url: `${course.cover}`,
       };
-      setFileList([]);
-      fileList.push(imageFile);
 
       form.setFieldsValue(values);
-      setFileList(fileList);
+      setFileList([imageFile]);
     }
   }, [course]);
 
