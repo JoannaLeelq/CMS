@@ -20,7 +20,6 @@ import styled from 'styled-components';
 import apiService from '../../lib/services/api-service';
 import NumberWithUnit from '../common/number-unit';
 import styles from '../../styles/components/addCourse.module.css';
-import { getBase64 } from '../../lib/util/base64';
 import { useForm } from 'antd/lib/form/Form';
 
 // css part
@@ -31,10 +30,8 @@ const StyledFormItem = styled(Form.Item)`
 const UploadCover = styled(Form.Item)`
   display: block;
   .ant-form-item-control {
-    position: absolute;
-    inset: 0;
-    top: 37px;
-    bottom: 30px;
+    height: 100%;
+    padding-bottom: 51px;
   }
 
   .ant-upload-picture-card-wrapper,
@@ -88,6 +85,19 @@ const UploadInner = styled.div`
   p {
     font-size: 24px;
     color: #999;
+  }
+`;
+
+const DescriptionArea = styled(Form.Item)`
+  display: block;
+  .ant-form-item-control {
+    height: 100%;
+    padding-bottom: 51px;
+  }
+
+  .ant-form-item-control-input,
+  .ant-form-item-control-input-content {
+    height: 100%;
   }
 `;
 
@@ -219,7 +229,7 @@ export default function AddCourseForm({ course, onSuccess }) {
         teacherId: course.teacherName,
         type: course.type.map((item) => item.name),
       };
-
+      console.log(course.cover.split('/')[-1]);
       const imageFile = {
         uid: `${course.uid}`,
         name: `${course.cover.split('/')[-1]}`,
@@ -355,70 +365,66 @@ export default function AddCourseForm({ course, onSuccess }) {
             </StyledFormItem>
           </Col>
 
-          <Col xs={24} sm={24} md={16}>
-            <Row gutter={gutterValue} style={{ height: '100%' }}>
-              <Col xs={24} sm={24} md={12}>
-                <StyledFormItem
-                  label="Description"
-                  name="description"
-                  rules={[
-                    { required: true },
-                    {
-                      min: 100,
-                      max: 1000,
-                      message: 'Description length must between 100 - 1000 characters.',
-                    },
-                  ]}
-                  style={{ height: '100%' }}
+          <Col xs={24} sm={24} md={8}>
+            <DescriptionArea
+              label="Description"
+              name="description"
+              rules={[
+                { required: true },
+                {
+                  min: 100,
+                  max: 1000,
+                  message: 'Description length must between 100 - 1000 characters.',
+                },
+              ]}
+              style={{ height: '100%', marginBottom: '0px', display: 'block' }}
+            >
+              <TextArea placeholder="Course description" style={{ height: '100%' }} />
+            </DescriptionArea>
+          </Col>
+
+          {/* cover */}
+          <Col xs={24} sm={24} md={8}>
+            <UploadCover
+              label="Cover"
+              name="cover"
+              className="cover"
+              style={{ width: '100%', height: '100%' }}
+            >
+              <ImgCrop rotate aspect={16 / 9}>
+                <Upload
+                  action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                  listType="picture-card"
+                  fileList={fileList}
+                  onChange={onChange}
+                  onPreview={onPreview}
+                  style={{ width: '100%', height: '100%', border: '1px solid' }}
                 >
-                  <TextArea placeholder="Course description" rows={13} style={{ height: '100%' }} />
-                </StyledFormItem>
-              </Col>
+                  {fileList.length >= 1 ? null : (
+                    <UploadInner>
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
 
-              {/* cover */}
-              <Col xs={24} sm={24} md={12}>
-                <UploadCover
-                  label="Cover"
-                  name="cover"
-                  className="cover"
-                  style={{ width: '100%', height: '84%' }}
-                >
-                  <ImgCrop rotate aspect={16 / 9}>
-                    <Upload
-                      action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                      listType="picture-card"
-                      fileList={fileList}
-                      onChange={onChange}
-                      onPreview={onPreview}
-                      style={{ width: '100%', height: '100%', border: '1px solid' }}
-                    >
-                      {fileList.length >= 1 ? null : (
-                        <UploadInner>
-                          <p className="ant-upload-drag-icon">
-                            <InboxOutlined />
-                          </p>
+                      <p>Click or drag file to this area to upload</p>
+                    </UploadInner>
+                  )}
+                </Upload>
+              </ImgCrop>
+            </UploadCover>
 
-                          <p>Click or drag file to this area to upload</p>
-                        </UploadInner>
-                      )}
-                    </Upload>
-                  </ImgCrop>
-                </UploadCover>
-
-                {isUploading && (
-                  <CloseCircleOutlined
-                    onClick={closeUploadingImg}
-                    style={{
-                      position: 'absolute',
-                      top: '1em',
-                      right: '-10px',
-                      color: 'red',
-                      fontSize: '24px',
-                    }}
-                  />
-                )}
-              </Col>
-            </Row>
+            {isUploading && (
+              <CloseCircleOutlined
+                onClick={closeUploadingImg}
+                style={{
+                  position: 'absolute',
+                  top: '1em',
+                  right: '-10px',
+                  color: 'red',
+                  fontSize: '24px',
+                }}
+              />
+            )}
           </Col>
         </Row>
 

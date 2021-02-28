@@ -22,6 +22,12 @@ export default function CourseSchedule({ courseId, scheduleId, onSuccess, isAdd 
     setTime(time);
   };
 
+  const changeSelectedWeekdays = () => {
+    const selectedItem = form.getFieldValue('classTime');
+    const newSelectedWeekdays = selectedItem.map((item) => item.weekday);
+    setSelectedWeekdays(newSelectedWeekdays);
+  };
+
   const finishForm = (chapterSchedule) => {
     if (!courseId && !scheduleId) {
       message.error('You must select a course to update!');
@@ -81,6 +87,13 @@ export default function CourseSchedule({ courseId, scheduleId, onSuccess, isAdd 
     let afterDeletedItem = selectedWeekdays.filter((item) => item !== deleteItem?.weekday);
 
     setSelectedWeekdays(afterDeletedItem);
+  };
+
+  // when add weekday
+  const addSelectedWeekdays = () => {
+    const selectedItem = form.getFieldValue('classTime');
+    const selectedDays = selectedItem.map((item) => item.weekday);
+    setSelectedWeekdays(selectedDays);
   };
 
   return (
@@ -154,10 +167,7 @@ export default function CourseSchedule({ courseId, scheduleId, onSuccess, isAdd 
                           fieldKey={[field.fieldKey, 'weekday']}
                           rules={[{ required: true, message: 'Missing weekday' }]}
                         >
-                          <Select
-                            size="large"
-                            onChange={(value) => setSelectedWeekdays([...selectedWeekdays, value])}
-                          >
+                          <Select size="large" onChange={changeSelectedWeekdays}>
                             {weekdays.map((day, index) => {
                               return (
                                 <Option
@@ -210,7 +220,7 @@ export default function CourseSchedule({ courseId, scheduleId, onSuccess, isAdd 
                     <Button
                       type="dashed"
                       onClick={() => {
-                        updateSelectedWeekdays();
+                        addSelectedWeekdays();
                         add();
                       }}
                       block

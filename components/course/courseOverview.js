@@ -22,7 +22,7 @@ export default function CourseOverview(props) {
   const gutter = [0, 20];
 
   return (
-    <Card cover={<img src={props.cover} />} {...props.cardCss}>
+    <Card cover={<img src={props.cover} style={{ height: '250px' }} />} {...props.cardCss}>
       <Row gutter={gutter}>
         <h3>{props.name}</h3>
       </Row>

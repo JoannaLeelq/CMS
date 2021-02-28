@@ -1,0 +1,3 @@
+.ant-steps-item-title ::after {
+  display: none;
+}

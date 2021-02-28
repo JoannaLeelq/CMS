@@ -38,7 +38,12 @@ const StepsRow = styled(Row)`
   ::-webkit-scrollbar {
     display: none;
   }
+  .ant-steps-item-title {
+    overflow: hidden;
+  }
 `;
+
+const { Step } = Steps;
 
 const tagColor = [
   'magenta',
@@ -67,12 +72,7 @@ const genExtra = (currentIndex, processKey) => {
   }
 };
 
-const currentKey = (chaptersArr, itemIndex) => {
-  return chaptersArr[itemIndex].id;
-};
-
 export async function getServerSideProps(context) {
-  // console.log(context);
   return {
     props: { id: context.params.id },
   };
@@ -83,8 +83,6 @@ export default function CourseDetail(props) {
   const [leftInfo, setLeftInfo] = useState([]);
   const [processKey, setProcessKey] = useState(0);
   const [data, setData] = useState();
-
-  const { Step } = Steps;
 
   useEffect(() => {
     const id = router.query.id || props.id;
@@ -140,7 +138,7 @@ export default function CourseDetail(props) {
             <StepsRow>
               <Steps current={processKey} size="small" style={{ width: 'auto' }}>
                 {data?.schedule.chapters.map((item) => (
-                  <Steps.Step title={item.name} key={item.id} />
+                  <Step title={item.name} key={item.id} style={{ overflow: 'initial' }} />
                 ))}
               </Steps>
             </StepsRow>
@@ -169,14 +167,12 @@ export default function CourseDetail(props) {
 
             <h3>Chapter</h3>
             {data?.schedule && (
-              <Collapse
-                defaultActiveKey={currentKey(data?.schedule.chapters, data?.schedule.current)}
-              >
-                {data?.schedule.chapters.map((item, index) => (
+              <Collapse defaultActiveKey={data.schedule.current}>
+                {data?.schedule.chapters.map((item) => (
                   <Collapse.Panel
                     key={item.id}
                     header={item.name}
-                    extra={genExtra(index, data.schedule.current)}
+                    extra={genExtra(item.id, data.schedule.current)}
                   >
                     <p>{item.content}</p>
                   </Collapse.Panel>
