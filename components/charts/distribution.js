@@ -2,8 +2,13 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import Highcharts from 'highcharts/highmaps';
 import HighchartsReact from 'highcharts-react-official';
+import HighchartsExporting from 'highcharts/modules/exporting';
 
 import apiService from '../../lib/services/api-service';
+
+if (typeof Highcharts === 'object') {
+  HighchartsExporting(Highcharts);
+}
 
 export default function Distribution({ data, title }) {
   const [world, setWorld] = useState(null);

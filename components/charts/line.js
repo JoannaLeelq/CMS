@@ -2,10 +2,9 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import styled from 'styled-components';
 
-import apiService from '../../lib/services/api-service';
-
-export default function Line({ data, title }) {
+export default function Line({ data }) {
   const [options, setOptions] = useState({
     chart: {
       type: 'line',
@@ -35,18 +34,34 @@ export default function Line({ data, title }) {
         text: 'Increment',
       },
     },
-    series: [
-      {
-        name: 'Tokyo',
-        data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6],
-      },
-      {
-        name: 'London',
-        data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8],
-      },
-    ],
+    exporting: {
+      enabled: false,
+    },
   });
 
-  useEffect(() => {}, [data]);
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    const dataSource = data.map((item) => ({ name: item.name.split('-')[1], amount: item.amount }));
+    const seriesData = new Array(12).fill(0).map((_, index) => {
+      const month = index + 1;
+      const courseAmount = dataSource
+        .filter((item) => item.name == month)
+        .reduce((acc, cur) => (acc = acc + cur.amount), 0);
+
+      return courseAmount;
+    });
+
+    setOptions({
+      series: [
+        {
+          name: 'course',
+          data: seriesData,
+        },
+      ],
+    });
+  }, [data]);
   return <HighchartsReact highcharts={Highcharts} options={options}></HighchartsReact>;
 }

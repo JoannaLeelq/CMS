@@ -1,7 +1,7 @@
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import HighchartsExporting from 'highcharts/modules/exporting';
 import { useEffect, useState } from 'react';
-import apiService from '../../lib/services/api-service';
 
 export default function Pie({ data, title, subtitle }) {
   const [options, setOptions] = useState({

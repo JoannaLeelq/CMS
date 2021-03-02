@@ -127,7 +127,7 @@ export default function APPLayout(props) {
   };
 
   return (
-    <Layout style={{ height: '100vh' }}>
+    <Layout style={{ height: '100vh' }} hasSider={true}>
       <Sider
         collapsible
         collapsed={collapsed}

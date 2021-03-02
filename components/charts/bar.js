@@ -1,8 +1,6 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
-import apiService from '../../lib/services/api-service';
 
 export default function Bar({ data }) {
   const [options, setOptions] = useState({
@@ -26,16 +24,86 @@ export default function Bar({ data }) {
       enabled: false,
     },
     tooltip: {
-      pointFormat: 'Interest: <b>{point.y:.1f}</b>',
+      // pointFormat: 'Interest: <b>{point.y:.1f}</b>',
+      formatter: function () {
+        return (
+          '<b>' +
+          this.x +
+          '</b><br/>' +
+          this.series.name +
+          ': ' +
+          this.y +
+          '<br/>' +
+          'Total: ' +
+          this.point.stackTotal
+        );
+      },
+    },
+
+    plotOptions: {
+      column: {
+        stacking: 'normal',
+        dataLabels: {
+          enabled: true,
+        },
+      },
+    },
+    exporting: {
+      enabled: false,
     },
   });
 
   useEffect(() => {
-    if (!data) {
+    if (!data || Object.values(data).some((item) => !item)) {
       return;
     }
 
-    const dataSource = data.map((item) => [item.name, item.amount]);
+    const teacherKeys = Object.keys(data.teacher);
+    const interestKeys = data.interest.map((item) => item.name);
+    const xAxisData = [...teacherKeys, ...interestKeys];
+    const xAxisSource = Array.from(new Set(xAxisData));
+
+    const dataInterest = data.interest.map((item) => {
+      return [item.name, item.amount];
+    });
+
+    // level for teacher skills
+    const levelArr = Object.values(data.teacher)
+      .flat()
+      .map((item) => item.level);
+    const levels = levelArr
+      .filter((ele, index, self) => {
+        return index == self.indexOf(ele);
+      })
+      .sort();
+
+    // handle teacher skill data group by level   [ "Assembly Language", 30 ]
+    const teacherData = Object.entries(data.teacher);
+
+    const categoriesData = levels.map((level) =>
+      teacherData.map((item) => {
+        const targetObj = item[1]?.find((singleObj) => singleObj.level === level);
+        const amount = !!targetObj ? targetObj.amount : 0;
+        return [item[0], amount];
+      })
+    );
+
+    const leveledData = categoriesData.map((item, index) => {
+      return {
+        name: `level ${index + 1}`,
+        data: item,
+        stack: 'teacherSkill',
+      };
+    });
+
+    const seriesData = [
+      ...leveledData,
+      {
+        name: 'Interest',
+        data: dataInterest,
+        stack: 'interest',
+      },
+    ];
 
     setOptions({
       xAxis: {
@@ -47,26 +115,18 @@ export default function Bar({ data }) {
             fontFamily: 'Verdana, sans-serif',
           },
         },
+        categories: xAxisSource,
       },
-      series: [
-        {
-          name: 'Interest',
-          data: dataSource,
-          dataLabels: {
-            enabled: true,
-            inside: true,
-            color: '#ffffff',
-            align: 'right',
-            format: '{point.y:.1f}', // one decimal
-            y: 10, // 10 pixels down from the top
-            style: {
-              fontSize: '12px',
-              fontFamily: 'Verdana, sans-serif',
-            },
-          },
-        },
-      ],
+
+      series: seriesData,
     });
   }, [data]);
-  return <HighchartsReact highcharts={Highcharts} options={options}></HighchartsReact>;
+
+  return (
+    <HighchartsReact
+      highcharts={Highcharts}
+      options={options}
+      constructorType={'chart'}
+    ></HighchartsReact>
+  );
 }

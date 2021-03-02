@@ -9,6 +9,7 @@ import Distribution from '../../../components/charts/distribution';
 import Pie from '../../../components/charts/pie';
 import Line from '../../../components/charts/line';
 import Bar from '../../../components/charts/bar';
+import dynamic from 'next/dynamic';
 
 const IconCol = styled(Col)`
   display: flex;
@@ -16,6 +17,7 @@ const IconCol = styled(Col)`
   justify-content: center;
   font-size: 32px;
   .anticon {
+    color: #999999;
     padding: 25px;
     background: white;
     border-radius: 50%;
@@ -40,6 +42,10 @@ const Overview = ({ data, title, icon, style, percent }) => {
 };
 
 const { Option } = Select;
+
+const DistributionWithNoSSR = dynamic(() => import('../../../components/charts/distribution'), {
+  ssr: false,
+});
 
 export default function Page() {
   const [overview, setOverview] = useState(null);
@@ -142,7 +148,7 @@ export default function Page() {
               </Select>
             }
           >
-            <Distribution
+            <DistributionWithNoSSR
               data={
                 distrubtionRole === Role.Student
                   ? studentDistribution?.country
@@ -214,13 +220,18 @@ export default function Page() {
       <Row gutter={[8, 16]}>
         <Col xs={24} sm={24} md={12}>
           <Card title="Increment">
-            <Line />
+            <Line data={courseStatistics?.createdAt} />
           </Card>
         </Col>
 
         <Col xs={24} sm={24} md={12}>
           <Card title="Languages">
-            <Bar data={studentDistribution?.interest} />
+            <Bar
+              data={{
+                interest: studentDistribution?.interest,
+                teacher: teacherDistribution?.skills,
+              }}
+            />
           </Card>
         </Col>
       </Row>
