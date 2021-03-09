@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import { LevelNames } from '../../lib/constant/role';
 
 export default function Bar({ data }) {
   const [options, setOptions] = useState({
@@ -73,7 +74,7 @@ export default function Bar({ data }) {
       .map((item) => item.level);
     const levels = levelArr
       .filter((ele, index, self) => {
-        return index == self.indexOf(ele);
+        return index === self.indexOf(ele);
       })
       .sort();
 
@@ -90,7 +91,7 @@ export default function Bar({ data }) {
 
     const leveledData = categoriesData.map((item, index) => {
       return {
-        name: `level ${index + 1}`,
+        name: `${LevelNames[index + 1]}`,
         data: item,
         stack: 'teacherSkill',
       };
@@ -109,6 +110,7 @@ export default function Bar({ data }) {
       xAxis: {
         type: 'category',
         labels: {
+          step: 1,
           rotation: -45,
           style: {
             fontSize: '13px',

@@ -3,12 +3,12 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SelectOutlined,
+  BellOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
-import { Layout, Menu, Breadcrumb } from 'antd';
-import React, { children, useState } from 'react';
+import { Layout, Menu, Breadcrumb, Row, Badge } from 'antd';
+import React, { children, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import apiService from '../../lib/services/api-service';
@@ -18,6 +18,7 @@ import storage from '../../lib/services/storage';
 import { generateKey, getActiveKey } from '../../lib/util/side-nav';
 import SubMenu from 'antd/lib/menu/SubMenu';
 import AppBreadcrumb from '../breadcrumb';
+import { MessagePanel } from '../message/messagePanel';
 
 const { Header, Sider, Content } = Layout;
 
@@ -107,6 +108,13 @@ const axios = require('axios');
 export default function APPLayout(props) {
   const router = useRouter();
   const [collapsed, toggleCollapse] = useState(false);
+  const [unreadTotalMessages, setUnreadTotalMessages] = useState(0);
+  const [messageNum, setMessageNum] = useState(0);
+  const [message, setMessage] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
   const userType = useUserType();
   const sideNav = routes[userType];
   const menuItems = renderMenuItems(sideNav);
@@ -125,6 +133,60 @@ export default function APPLayout(props) {
       router.push('/login');
     }
   };
+
+  useEffect(() => {
+    const req = {
+      userId: storage ? storage.getUserInfo()['userId'] : null,
+    };
+
+    apiService.getMessageStatistics(req).then((res) => {
+      const { data } = res;
+      console.log('data', data);
+      const receiveData = data?.receive;
+      const unreadMessage = receiveData.message.unread;
+      const unreadNotification = receiveData.notification.unread;
+      const totalUnread = unreadMessage + unreadNotification;
+      setUnreadTotalMessages(totalUnread);
+
+      /**
+       * use sse steps:
+       * 1. 浏览器生成一个EventSource实例 var source = new EventSource(url);
+       * 2. 客户端收到服务器发来的数据，就会触发message事件，可以在onmessage属性的回调函数。
+       * 3. close方法用于关闭 SSE 连接
+       * 参考连接：https://www.ruanyifeng.com/blog/2017/05/server-sent_events.html
+       */
+      const sseSource = apiService.messageEvent();
+
+      sseSource.addEventListener(
+        'message',
+        function (event) {
+          var data = event.data;
+
+          data = JSON.parse(data || {});
+          console.log(data);
+
+          if (data.type !== 'heartbeat') {
+            const content = data.content;
+
+            if (content.type === 'message') {
+              notification.info({
+                message: `You have a message from ${content.from.nickname}`,
+                description: content.content,
+              });
+            }
+
+            setMessage(content);
+            // dispatch({ type: 'increment', payload: { type: content.type, count: 1 } });
+          }
+        },
+        false
+      );
+
+      return () => {
+        sseSource.close();
+      };
+    });
+  }, []);
 
   return (
     <Layout style={{ height: '100vh' }} hasSider={true}>
@@ -150,9 +212,16 @@ export default function APPLayout(props) {
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </HeaderIcon>
 
-          <HeaderIcon>
-            <LogoutOutlined onClick={logoutFunction} />
-          </HeaderIcon>
+          <Row align="middle">
+            <Badge size="small" count={unreadTotalMessages}>
+              <HeaderIcon>
+                <MessagePanel />
+              </HeaderIcon>
+            </Badge>
+            <HeaderIcon style={{ paddingLeft: '15px' }}>
+              <LogoutOutlined onClick={logoutFunction} />
+            </HeaderIcon>
+          </Row>
         </StyledLayoutHeader>
 
         <AppBreadcrumb />

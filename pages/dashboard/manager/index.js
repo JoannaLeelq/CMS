@@ -9,6 +9,7 @@ import Distribution from '../../../components/charts/distribution';
 import Pie from '../../../components/charts/pie';
 import Line from '../../../components/charts/line';
 import Bar from '../../../components/charts/bar';
+import HeatMap from '../../../components/charts/heatMap';
 import dynamic from 'next/dynamic';
 
 const IconCol = styled(Col)`
@@ -33,8 +34,13 @@ const Overview = ({ data, title, icon, style, percent }) => {
         <Col span={18}>
           <h3 style={{ color: 'white' }}>{title}</h3>
           <h2 style={{ color: 'white', fontSize: '32px' }}>{data.total}</h2>
-          <Progress percent={percent} showInfo={false} />
-          <p style={{ color: 'white' }}>{percent * 100}% Increase in 30 Days</p>
+          <Progress
+            percent={100 - percent}
+            showInfo={false}
+            strokeColor="white"
+            trailColor="lightgreen"
+          />
+          <p style={{ color: 'white' }}>{percent}% Increase in 30 Days</p>
         </Col>
       </Row>
     </Card>
@@ -61,7 +67,7 @@ export default function Page() {
     // statistics overview part
     apiService.getStatisticsOverview().then((res) => {
       const { data } = res;
-      console.log('overview', data);
+
       if (!!data) {
         setOverview(data);
       }
@@ -71,7 +77,7 @@ export default function Page() {
     // distribution for student
     apiService.getStatistics(Role.Student).then((res) => {
       const { data } = res;
-      console.log('student', data);
+
       setStudentDistribution(data);
       const totalStudentsNum = data?.type.reduce((acc, cur) => acc + cur.amount, 0);
       setTotalStudents(totalStudentsNum);
@@ -80,14 +86,14 @@ export default function Page() {
     // teacher statistics
     apiService.getStatistics(Role.Teacher).then((res) => {
       const { data } = res;
-      console.log('teacher', data);
+
       setTeacherDistribution(data);
     });
 
     // course statistics
     apiService.getStatistics(Role.Course).then((res) => {
       const { data } = res;
-      console.log('course:', data);
+
       setCourseStatistics(data);
       const totalCoursesNum = data?.type.reduce((acc, cur) => acc + cur.amount, 0);
       setTotalCourses(totalCoursesNum);
@@ -104,7 +110,7 @@ export default function Page() {
               data={overview.student}
               title="TOTAL STUDENTS"
               icon={<SolutionOutlined />}
-              percent={(overview.student.lastMonthAdded / overview.student.total).toFixed(3)}
+              percent={(overview.student.lastMonthAdded / overview.student.total).toFixed(3) * 100}
               style={{ background: '#1890ff' }}
             />
           </Col>
@@ -114,7 +120,7 @@ export default function Page() {
               data={overview.teacher}
               title="TOTAL TEACHERS"
               icon={<AlibabaOutlined />}
-              percent={(overview.teacher.lastMonthAdded / overview.teacher.total).toFixed(3)}
+              percent={(overview.teacher.lastMonthAdded / overview.teacher.total).toFixed(3) * 100}
               style={{ background: '#673bb7' }}
             />
           </Col>
@@ -124,7 +130,7 @@ export default function Page() {
               data={overview.course}
               title="TOTAL COURSES"
               icon={<ReadOutlined />}
-              percent={(overview.course.lastMonthAdded / overview.course.total).toFixed(3)}
+              percent={(overview.course.lastMonthAdded / overview.course.total).toFixed(3) * 100}
               style={{ background: '#ffaa16' }}
             />
           </Col>
@@ -232,6 +238,14 @@ export default function Page() {
                 teacher: teacherDistribution?.skills,
               }}
             />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col xs={24}>
+          <Card title="Course Schedule">
+            <HeatMap data={courseStatistics?.classTime} title="Course Schedule Per Weekday" />
           </Card>
         </Col>
       </Row>

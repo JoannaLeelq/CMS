@@ -21,3 +21,17 @@ Next js executes twice: sever side and then client side; however, when the serve
 使用 Next js Dynamic import()可以拆分代码，或针对第三方组件依赖浏览器 API 时，精致服务端渲染，设置(ssr:false)
 
 在 dashboard/manager/下面的 index.js 使用
+
+#### highcharts reflow:
+
+const chartCallback = (chart) => {
+setTimeout(() => {
+chart.reflow();
+});
+};
+<HighchartsReact
+highcharts={Highcharts}
+options={options}
+callback={chartCallback}
+
+> </HighchartsReact>

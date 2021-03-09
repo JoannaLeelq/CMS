@@ -5,6 +5,11 @@ import Highcharts from 'highcharts';
 import styled from 'styled-components';
 
 export default function Line({ data }) {
+  // const chartCallback = (chart) => {
+  //   setTimeout(() => {
+  //     chart.reflow();
+  //   },30);
+  // };
   const [options, setOptions] = useState({
     chart: {
       type: 'line',
@@ -49,7 +54,7 @@ export default function Line({ data }) {
       const month = index + 1;
       const courseAmount = dataSource
         .filter((item) => item.name == month)
-        .reduce((acc, cur) => (acc = acc + cur.amount), 0);
+        .reduce((acc, cur) => acc + cur.amount, 0);
 
       return courseAmount;
     });
@@ -63,5 +68,11 @@ export default function Line({ data }) {
       ],
     });
   }, [data]);
-  return <HighchartsReact highcharts={Highcharts} options={options}></HighchartsReact>;
+  return (
+    <HighchartsReact
+      highcharts={Highcharts}
+      options={options}
+      // callback={chartCallback}
+    ></HighchartsReact>
+  );
 }
