@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Tabs, Dropdown, Row, Col, Button } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
+import { Tabs, Dropdown, Row, Col, Button, Badge, message } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import apiService from '../../lib/services/api-service';
@@ -9,6 +9,7 @@ import { Avatar, List, Spin, Space } from 'antd';
 import { formatDistanceToNow } from 'date-fns';
 import { UserOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import { useMessageStatistic, MessageStatisticsContext } from '../provider';
 
 const TabNavContainer = styled.div`
   margin-bottom: 0;
@@ -51,30 +52,51 @@ const Footer = styled(Row)`
   }
 `;
 
+const HeaderIcon = styled.div`
+  font-size: 18px;
+  color: #fff;
+  cursor: pointer;
+  transition: color 0.3s;
+  &:hover {
+    color: #1890ff;
+  }
+`;
+
 function MessageContent(props) {
   const [paginator, setPaginator] = useState({ limit: 10, page: 1 });
   const [messages, setMessages] = useState([]);
   const [notification, setNotification] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const type = props.type;
+  console.log('%c [ type ]', 'font-size:13px; background:pink; color:#bf2c9f;', type);
+  const [totalNotification, setTotalNotification] = useState(0);
+  const [totalMessage, setTotalMessage] = useState(0);
 
   const dataSource = type === 'notification' ? notification : messages;
 
   useEffect(() => {
     apiService.getMessage(paginator).then((res) => {
       const { data } = res;
-      const total = data.total;
+      console.log('%c [ data ]', 'font-size:13px; background:pink; color:#bf2c9f;', data);
+
+      // const total = data.total;
       const newMessages = data?.messages.filter((item) => item.type === 'message');
       const newNotification = data?.messages.filter((item) => item.type === 'notification');
       const displayedMessages = [...messages, ...newMessages];
       const displayedNotification = [...notification, ...newNotification];
+      const totalMessagesNum = type === 'notification' ? totalNotification : totalMessage;
 
       setMessages(displayedMessages);
       setNotification(displayedNotification);
 
-      setHasMore(total > displayedNotification.length + displayedMessages.length);
+      const isEnd =
+        type === 'notification'
+          ? totalMessagesNum == displayedNotification.length
+          : totalMessagesNum == displayedMessages.length;
+
+      setHasMore(isEnd);
     });
-  }, [paginator]);
+  }, [props.clearAll]);
 
   return (
     <InfiniteScroll
@@ -117,14 +139,73 @@ function MessageContent(props) {
   );
 }
 
-export function MessagePanel() {
+export function MessagePanel(props) {
   const tabTypes = ['notification', 'message'];
   const [activeTab, setActiveTab] = useState('notification');
+  const { messageStore, dispatch } = useMessageStatistic();
   const [message, setMessage] = useState(null);
   const [clean, setClean] = useState({
     notification: 0,
     message: 0,
   });
+
+  const localhostData = storage.getUserInfo();
+
+  const role = localhostData['role'];
+
+  useEffect(() => {
+    const req = {
+      userId: storage ? storage.getUserInfo()['userId'] : null,
+    };
+
+    apiService.getMessageStatistics(req).then((res) => {
+      const { data } = res;
+      const receiveData = data?.receive;
+
+      dispatch({
+        type: 'increment',
+        payload: { type: 'message', count: receiveData.message.unread },
+      });
+      dispatch({
+        type: 'increment',
+        payload: { type: 'notification', count: receiveData.notification.unread },
+      });
+    });
+
+    /**
+     * use sse steps:
+     * 1. 浏览器生成一个EventSource实例 var source = new EventSource(url);
+     * 2. 客户端收到服务器发来的数据，就会触发message事件，可以在onmessage属性的回调函数。
+     * 3. close方法用于关闭 SSE 连接
+     * 参考连接：https://www.ruanyifeng.com/blog/2017/05/server-sent_events.html
+     */
+    const sse = apiService.messageEvent();
+
+    sse.onmessage = (event) => {
+      let { data } = event;
+
+      data = JSON.parse(data || {});
+
+      if (data.type !== 'heartbeat') {
+        const content = data.content;
+
+        if (content.type === 'message') {
+          notification.info({
+            message: `You have a message from ${content.from.nickname}`,
+            description: content.content,
+          });
+        }
+
+        setMessage(content);
+        dispatch({ type: 'increment', payload: { type: content.type, count: 1 } });
+      }
+    };
+
+    return () => {
+      sse.close();
+      dispatch({ type: 'reset' });
+    };
+  }, []);
 
   const { TabPane } = Tabs;
 
@@ -144,10 +225,19 @@ export function MessagePanel() {
         animated
       >
         {tabTypes.map((type, index) => {
+          // const unreadCount = messageStore[type]
           return (
-            <TabPane tab={`${type} `} key={index}>
+            <TabPane tab={`${type}`} key={index}>
               <MessageContainer id={type}>
-                <MessageContent type={type} scrollTarget={type} />
+                <MessageContent
+                  type={type}
+                  scrollTarget={type}
+                  clearAll={clean[type]}
+                  onRead={(count) => {
+                    dispatch({ type: 'decrement', payload: { type, count } });
+                  }}
+                  message={message}
+                />
               </MessageContainer>
             </TabPane>
           );
@@ -160,7 +250,7 @@ export function MessagePanel() {
         </Col>
         <Col span={12}>
           <Button>
-            <Link href={`/dashboard/${storage.getUserInfo()['role']}/message`}>View history</Link>
+            <Link href={`/dashboard/${role}/message`}>View history</Link>
           </Button>
         </Col>
       </Footer>
@@ -168,19 +258,23 @@ export function MessagePanel() {
   );
 
   return (
-    <Dropdown
-      placement="bottomRight"
-      trigger={['click']}
-      overlay={dropDownContent}
-      overlayStyle={{
-        background: '#fff',
-        borderRadius: 4,
-        width: 400,
-        height: 500,
-        overflow: 'hidden',
-      }}
-    >
-      <BellOutlined style={{ fontSize: 24, marginTop: 5 }} />
-    </Dropdown>
+    <Badge size="small" count={73} offset={[10, 0]}>
+      <HeaderIcon>
+        <Dropdown
+          placement="bottomRight"
+          trigger={['click']}
+          overlay={dropDownContent}
+          overlayStyle={{
+            background: '#fff',
+            borderRadius: 4,
+            width: 400,
+            height: 500,
+            overflow: 'hidden',
+          }}
+        >
+          <BellOutlined style={{ fontSize: 24, marginTop: 5 }} />
+        </Dropdown>
+      </HeaderIcon>
+    </Badge>
   );
 }
