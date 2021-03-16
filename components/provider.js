@@ -21,9 +21,9 @@ export function reducer(state, action) {
         total: state.total - action.payload.count,
       };
     case 'reset':
-      return { ...store };
+      return { ...initState };
     default:
-      return { ...state };
+      return { ...initState };
   }
 }
 
@@ -35,7 +35,7 @@ export function reducer(state, action) {
  *
  */
 
-const MessageStatisticsContext = React.createContext(initState);
+const MessageStatisticsContext = React.createContext(null);
 
 export const MessageProvider = (props) => {
   const [state, dispatch] = useReducer(reducer, initState);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Tabs, Dropdown, Row, Col, Button, Badge, message } from 'antd';
+import { Tabs, Dropdown, Row, Col, Button, Badge, message, notification } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import apiService from '../../lib/services/api-service';
@@ -68,13 +68,45 @@ function MessageContent(props) {
   const [notification, setNotification] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const type = props.type;
-  console.log('%c [ type ]', 'font-size:13px; background:pink; color:#bf2c9f;', type);
   const [totalNotification, setTotalNotification] = useState(0);
   const [totalMessage, setTotalMessage] = useState(0);
+  const [dataSource, setDataSource] = useState([]);
 
-  const dataSource = type === 'notification' ? notification : messages;
+  // const dataSource = props.type === 'notification' ? notification : messages;
+  console.log('props',props);
 
+  // get data based on the type
+  // useEffect(()=>{
+  //   apiService.getMessage(paginator).then((res) => {
+  //     const {data} = res;
+
+  //     const newMessages = data?.messages.filter((item) => item.type === 'message');
+  //     const newNotification = data?.messages.filter((item) => item.type === 'notification');
+  //     const displayedMessages = [...messages, ...newMessages];
+  //     const displayedNotification = [...notification, ...newNotification];
+  //     const totalMessagesNum = type === 'notification' ? totalNotification : totalMessage;
+
+  //     setMessages(displayedMessages);
+  //     setNotification(displayedNotification);
+
+  //     const isEnd =
+  //       type === 'notification'
+  //         ? totalMessagesNum == displayedNotification.length
+  //         : totalMessagesNum == displayedMessages.length;
+
+  //     setDataSource(props.type === 'message'? displayedMessages:displayedNotification);
+  //     setHasMore(isEnd);
+
+  //   });
+
+  // },[props.type, paginator, props.message]);
+
+  // clear all after click mark all as read
   useEffect(() => {
+    if(props.clearAll && dataSource && dataSource.length){
+      console.log('datasource', dataSource);
+
+    }
     apiService.getMessage(paginator).then((res) => {
       const { data } = res;
       console.log('%c [ data ]', 'font-size:13px; background:pink; color:#bf2c9f;', data);
@@ -97,6 +129,14 @@ function MessageContent(props) {
       setHasMore(isEnd);
     });
   }, [props.clearAll]);
+
+  // useEffect(() => {
+  //   if (!!props.message && props.message.type === props.type) {
+  //     console.log('%c [ props.message ]', 'font-size:13px; background:pink; color:#bf2c9f;', props.message)
+      
+  //     setDataSource([props.message, ...dataSource]);
+  //   }
+  // }, [props.message]);
 
   return (
     <InfiniteScroll
@@ -148,10 +188,11 @@ export function MessagePanel(props) {
     notification: 0,
     message: 0,
   });
-
+  
   const localhostData = storage.getUserInfo();
 
-  const role = localhostData['role'];
+  // const role = localhostData['role'];
+  const role = 'manager';
 
   useEffect(() => {
     const req = {
@@ -161,6 +202,8 @@ export function MessagePanel(props) {
     apiService.getMessageStatistics(req).then((res) => {
       const { data } = res;
       const receiveData = data?.receive;
+      
+      console.log('%c [ receiveData ]', 'font-size:13px; background:pink; color:#bf2c9f;', receiveData)
 
       dispatch({
         type: 'increment',
@@ -258,8 +301,8 @@ export function MessagePanel(props) {
   );
 
   return (
-    <Badge size="small" count={73} offset={[10, 0]}>
-      <HeaderIcon>
+    // <Badge size="small" count={messageStore.total} offset={[10, 0]}>
+    //   <HeaderIcon>
         <Dropdown
           placement="bottomRight"
           trigger={['click']}
@@ -274,7 +317,7 @@ export function MessagePanel(props) {
         >
           <BellOutlined style={{ fontSize: 24, marginTop: 5 }} />
         </Dropdown>
-      </HeaderIcon>
-    </Badge>
+    //   </HeaderIcon>
+    // </Badge>
   );
 }
