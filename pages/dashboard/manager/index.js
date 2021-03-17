@@ -130,7 +130,7 @@ export default function Page() {
               data={overview.course}
               title="TOTAL COURSES"
               icon={<ReadOutlined />}
-              percent={(overview.course.lastMonthAdded / overview.course.total).toFixed(3) * 100}
+              percent={(overview.course.lastMonthAdded / overview.course.total).toFixed(2) * 100}
               style={{ background: '#ffaa16' }}
             />
           </Col>

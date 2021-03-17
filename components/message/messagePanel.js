@@ -63,84 +63,63 @@ const HeaderIcon = styled.div`
 `;
 
 function MessageContent(props) {
-  const [paginator, setPaginator] = useState({ limit: 10, page: 1 });
   const [messages, setMessages] = useState([]);
   const [notification, setNotification] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-  const type = props.type;
+  const chosenType = props.type;
+  const [request, setRequest] = useState({ limit: 10, page: 1, type: chosenType });
+  const [paginator, setPaginator] = useState({ limit: request.limit, page: request.page });
   const [totalNotification, setTotalNotification] = useState(0);
   const [totalMessage, setTotalMessage] = useState(0);
   const [dataSource, setDataSource] = useState([]);
 
-  // const dataSource = props.type === 'notification' ? notification : messages;
-  console.log('props',props);
-
   // get data based on the type
-  // useEffect(()=>{
-  //   apiService.getMessage(paginator).then((res) => {
-  //     const {data} = res;
+  useEffect(() => {
+    apiService.getMessage(request).then((res) => {
+      const { data } = res;
 
-  //     const newMessages = data?.messages.filter((item) => item.type === 'message');
-  //     const newNotification = data?.messages.filter((item) => item.type === 'notification');
-  //     const displayedMessages = [...messages, ...newMessages];
-  //     const displayedNotification = [...notification, ...newNotification];
-  //     const totalMessagesNum = type === 'notification' ? totalNotification : totalMessage;
+      const getData = data?.messages;
+      const displayedData = [...dataSource, ...getData];
 
-  //     setMessages(displayedMessages);
-  //     setNotification(displayedNotification);
+      const isEnd = data.total > displayedData.length;
 
-  //     const isEnd =
-  //       type === 'notification'
-  //         ? totalMessagesNum == displayedNotification.length
-  //         : totalMessagesNum == displayedMessages.length;
-
-  //     setDataSource(props.type === 'message'? displayedMessages:displayedNotification);
-  //     setHasMore(isEnd);
-
-  //   });
-
-  // },[props.type, paginator, props.message]);
+      setDataSource(displayedData);
+      setHasMore(isEnd);
+    });
+  }, [props.type, request]);
 
   // clear all after click mark all as read
   useEffect(() => {
-    if(props.clearAll && dataSource && dataSource.length){
-      console.log('datasource', dataSource);
+    if (props.clearAll && dataSource && dataSource.length) {
+      const ids = dataSource.filter((item) => item.status === 0).map((item) => item.id);
+      console.log('%c [ ids ]', 'font-size:13px; background:pink; color:#bf2c9f;', ids);
 
+      if (ids.length > 0) {
+        apiService.changeToRead(ids).then((res) => {
+          console.log('%c [ res ]', 'font-size:13px; background:pink; color:#bf2c9f;', res);
+          // if (res.data) {
+          //   setDataSource(dataSource.map((item) => ({ ...item, status: 1 })));
+          // }
+          // if (props.onRead) {
+          //   props.onRead(ids.length);
+          // }
+        });
+      } else {
+        message.warn(`All of these ${props.type}s has been marked as read!`);
+      }
     }
-    apiService.getMessage(paginator).then((res) => {
-      const { data } = res;
-      console.log('%c [ data ]', 'font-size:13px; background:pink; color:#bf2c9f;', data);
-
-      // const total = data.total;
-      const newMessages = data?.messages.filter((item) => item.type === 'message');
-      const newNotification = data?.messages.filter((item) => item.type === 'notification');
-      const displayedMessages = [...messages, ...newMessages];
-      const displayedNotification = [...notification, ...newNotification];
-      const totalMessagesNum = type === 'notification' ? totalNotification : totalMessage;
-
-      setMessages(displayedMessages);
-      setNotification(displayedNotification);
-
-      const isEnd =
-        type === 'notification'
-          ? totalMessagesNum == displayedNotification.length
-          : totalMessagesNum == displayedMessages.length;
-
-      setHasMore(isEnd);
-    });
   }, [props.clearAll]);
 
-  // useEffect(() => {
-  //   if (!!props.message && props.message.type === props.type) {
-  //     console.log('%c [ props.message ]', 'font-size:13px; background:pink; color:#bf2c9f;', props.message)
-      
-  //     setDataSource([props.message, ...dataSource]);
-  //   }
-  // }, [props.message]);
+  // Once server send data to the user, update dataSource
+  useEffect(() => {
+    if (!!props.message && props.message.type === props.type) {
+      setDataSource([props.message, ...dataSource]);
+    }
+  }, [props.message]);
 
   return (
     <InfiniteScroll
-      next={() => setPaginator({ ...paginator, page: paginator.page + 1 })}
+      next={() => setRequest({ ...request, page: request.page + 1 })}
       hasMore={hasMore}
       loader={
         <div style={{ textAlign: 'center' }}>
@@ -162,9 +141,23 @@ function MessageContent(props) {
               <Space>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</Space>,
             ]}
             onClick={() => {
-              if (item.status) {
+              // status:0 means not read. status:1 means already read
+              if (item.status === 1) {
                 return;
               }
+
+              apiService.changeToRead([item.id]).then((res) => {
+                if (res.data) {
+                  const targetData = dataSource.find((singleData) => item.id === singleData.id);
+
+                  targetData.status = 1;
+                  setDataSource([...dataSource]);
+                }
+
+                if (props.onRead) {
+                  props.onRead(1);
+                }
+              });
             }}
           >
             <List.Item.Meta
@@ -188,11 +181,10 @@ export function MessagePanel(props) {
     notification: 0,
     message: 0,
   });
-  
+
   const localhostData = storage.getUserInfo();
 
-  // const role = localhostData['role'];
-  const role = 'manager';
+  const role = localhostData?.role;
 
   useEffect(() => {
     const req = {
@@ -202,8 +194,6 @@ export function MessagePanel(props) {
     apiService.getMessageStatistics(req).then((res) => {
       const { data } = res;
       const receiveData = data?.receive;
-      
-      console.log('%c [ receiveData ]', 'font-size:13px; background:pink; color:#bf2c9f;', receiveData)
 
       dispatch({
         type: 'increment',
@@ -226,7 +216,6 @@ export function MessagePanel(props) {
 
     sse.onmessage = (event) => {
       let { data } = event;
-
       data = JSON.parse(data || {});
 
       if (data.type !== 'heartbeat') {
@@ -260,17 +249,17 @@ export function MessagePanel(props) {
             <DefaultTabBar {...props} />
           </TabNavContainer>
         )}
-        onChange={(tabTypes) => {
-          if (tabTypes !== activeTab) {
-            setActiveTab(tabTypes);
+        onChange={(tabType) => {
+          if (tabType !== activeTab) {
+            setActiveTab(tabType);
           }
         }}
         animated
       >
         {tabTypes.map((type, index) => {
-          // const unreadCount = messageStore[type]
+          const unreadCount = messageStore[type];
           return (
-            <TabPane tab={`${type}`} key={index}>
+            <TabPane tab={`${type} (${unreadCount})`} key={index}>
               <MessageContainer id={type}>
                 <MessageContent
                   type={type}
@@ -289,7 +278,13 @@ export function MessagePanel(props) {
 
       <Footer justify="space-between" align="middle">
         <Col span={12}>
-          <Button>Mark all as read</Button>
+          <Button
+            onClick={() => {
+              setClean({ ...clean });
+            }}
+          >
+            Mark all as read
+          </Button>
         </Col>
         <Col span={12}>
           <Button>
@@ -303,20 +298,20 @@ export function MessagePanel(props) {
   return (
     // <Badge size="small" count={messageStore.total} offset={[10, 0]}>
     //   <HeaderIcon>
-        <Dropdown
-          placement="bottomRight"
-          trigger={['click']}
-          overlay={dropDownContent}
-          overlayStyle={{
-            background: '#fff',
-            borderRadius: 4,
-            width: 400,
-            height: 500,
-            overflow: 'hidden',
-          }}
-        >
-          <BellOutlined style={{ fontSize: 24, marginTop: 5 }} />
-        </Dropdown>
+    <Dropdown
+      placement="bottomRight"
+      trigger={['click']}
+      overlay={dropDownContent}
+      overlayStyle={{
+        background: '#fff',
+        borderRadius: 4,
+        width: 400,
+        height: 500,
+        overflow: 'hidden',
+      }}
+    >
+      <BellOutlined style={{ fontSize: 24, marginTop: 5 }} />
+    </Dropdown>
     //   </HeaderIcon>
     // </Badge>
   );
