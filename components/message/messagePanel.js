@@ -90,19 +90,18 @@ function MessageContent(props) {
 
   // clear all after click mark all as read
   useEffect(() => {
+    console.log('dataSource', dataSource);
     if (props.clearAll && dataSource && dataSource.length) {
       const ids = dataSource.filter((item) => item.status === 0).map((item) => item.id);
-      console.log('%c [ ids ]', 'font-size:13px; background:pink; color:#bf2c9f;', ids);
 
       if (ids.length > 0) {
         apiService.changeToRead(ids).then((res) => {
-          console.log('%c [ res ]', 'font-size:13px; background:pink; color:#bf2c9f;', res);
-          // if (res.data) {
-          //   setDataSource(dataSource.map((item) => ({ ...item, status: 1 })));
-          // }
-          // if (props.onRead) {
-          //   props.onRead(ids.length);
-          // }
+          if (res.data) {
+            setDataSource(dataSource.map((item) => ({ ...item, status: 1 })));
+          }
+          if (props.onRead) {
+            props.onRead(ids.length);
+          }
         });
       } else {
         message.warn(`All of these ${props.type}s has been marked as read!`);
@@ -172,15 +171,17 @@ function MessageContent(props) {
   );
 }
 
-export function MessagePanel(props) {
+export function MessagePanel() {
   const tabTypes = ['notification', 'message'];
   const [activeTab, setActiveTab] = useState('notification');
   const { messageStore, dispatch } = useMessageStatistic();
   const [message, setMessage] = useState(null);
+  const [markAllasRead, setMarkAllAsRead] = useState(false);
   const [clean, setClean] = useState({
     notification: 0,
     message: 0,
   });
+  const [cleanAll, setCleanAll] = useState(false);
 
   const localhostData = storage.getUserInfo();
 
@@ -264,7 +265,8 @@ export function MessagePanel(props) {
                 <MessageContent
                   type={type}
                   scrollTarget={type}
-                  clearAll={clean[type]}
+                  // clearAll={cleanAll}
+                  cleanAll={markAllasRead}
                   onRead={(count) => {
                     dispatch({ type: 'decrement', payload: { type, count } });
                   }}
@@ -280,7 +282,8 @@ export function MessagePanel(props) {
         <Col span={12}>
           <Button
             onClick={() => {
-              setClean({ ...clean });
+              setMarkAllAsRead(true);
+              // setClean({ ...clean, currentTab: activeTab });
             }}
           >
             Mark all as read
