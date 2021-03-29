@@ -16,11 +16,10 @@ export default function Message() {
   const [tempData, setTempData] = useState([]);
 
   const { Title } = Typography;
-  
-  const {dispatch} = useMessageStatistic();
+
+  const { dispatch } = useMessageStatistic();
 
   useEffect(() => {
-    console.log('paginator', paginator);
     apiService.getMessage(paginator).then((res) => {
       console.log('res: ', res);
       const { data } = res;
@@ -39,10 +38,12 @@ export default function Message() {
         }
         return acc;
       }, source);
-      
+
       // change Object to array and save to dataSource
-      const resultArray = Object.entries(result).sort((pre, next) => new Date(next[0]).getTime - new Date(pre[0]).getTime());
-      
+      const resultArray = Object.entries(result).sort(
+        (pre, next) => new Date(next[0]).getTime - new Date(pre[0]).getTime()
+      );
+
       const isEnd = data?.total > receivedData.length;
 
       setTempData(receivedData);
@@ -71,6 +72,7 @@ export default function Message() {
 
               setType(value);
               setSource({});
+              setTempData([]);
               setDataSource([]);
             }}
             style={{ minWidth: 100 }}
@@ -98,22 +100,18 @@ export default function Message() {
           <List
             itemLayout="vertical"
             dataSource={dataSource}
-            renderItem={([date, values],index) =>{
-              console.log('date, values: ', date, values);
+            renderItem={([date, values], index) => {
               return (
-              <>
-                <Space size="large">
-                  <Typography.Title level={3}>
-                    {date}
-                  </Typography.Title>
-                </Space>
-                {
-                  values.map((item, itemIndex) => (
+                <>
+                  <Space size="large">
+                    <Typography.Title level={3}>{date}</Typography.Title>
+                  </Space>
+                  {values.map((item, itemIndex) => (
                     <List.Item
-                      key = {`${item.createdAt}-${itemIndex}-${chosenType}`}
+                      key={`${item.createdAt}-${itemIndex}-${chosenType}`}
                       style={{ opacity: item.status ? 0.4 : 1 }}
                       actions={[<Space>{item.createdAt}</Space>]}
-                      extra = {
+                      extra={
                         <Space>
                           {item.type === 'notification' ? <AlertOutlined /> : <MessageOutlined />}
                         </Space>
@@ -123,25 +121,24 @@ export default function Message() {
                           return;
                         }
 
-                        apiService.changeToRead([item.id]).then(res => {
-                          if(res.data){
+                        apiService.changeToRead([item.id]).then((res) => {
+                          if (res.data) {
                             let target = null;
 
                             console.log(dataSource);
                             dataSource.forEach(([_, values]) => {
                               const searchResult = values.find((value) => value.id === item.id);
 
-                              if (!!searchResult){
+                              if (!!searchResult) {
                                 target = searchResult;
                                 // throw new Error('just end loop');
                               }
-                            })
+                            });
 
                             target.status = 1;
                             setDataSource([...dataSource]);
                             dispatch({ type: 'decrement', payload: { count: 1, type: item.type } });
                           }
-
                         });
                       }}
                     >
@@ -151,15 +148,10 @@ export default function Message() {
                         description={item.content}
                       />
                     </List.Item>
-                  ))
-                }
-              </>
+                  ))}
+                </>
               );
-              
-            }
-
-            }
-
+            }}
           ></List>
         </InfiniteScroll>
       </div>

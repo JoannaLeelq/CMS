@@ -229,7 +229,7 @@ export default function AddCourseForm({ course, onSuccess }) {
         teacherId: course.teacherName,
         type: course.type.map((item) => item.name),
       };
-      console.log(course.cover.split('/')[-1]);
+
       const imageFile = {
         uid: `${course.uid}`,
         name: `${course.cover.split('/')[-1]}`,

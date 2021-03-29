@@ -73,6 +73,12 @@ function MessageContent(props) {
   const [totalMessage, setTotalMessage] = useState(0);
   const [dataSource, setDataSource] = useState([]);
 
+  useEffect(() => {
+    if (props.type !== chosenType) {
+      setDataSource([]);
+    }
+  }, [props.type]);
+
   // get data based on the type
   useEffect(() => {
     apiService.getMessage(request).then((res) => {
@@ -86,11 +92,10 @@ function MessageContent(props) {
       setDataSource(displayedData);
       setHasMore(isEnd);
     });
-  }, [props.type, request]);
+  }, [request]);
 
   // clear all after click mark all as read
   useEffect(() => {
-    console.log('dataSource', dataSource);
     if (props.clearAll && dataSource && dataSource.length) {
       const ids = dataSource.filter((item) => item.status === 0).map((item) => item.id);
 
@@ -265,7 +270,6 @@ export function MessagePanel() {
                 <MessageContent
                   type={type}
                   scrollTarget={type}
-                  // clearAll={cleanAll}
                   cleanAll={markAllasRead}
                   onRead={(count) => {
                     dispatch({ type: 'decrement', payload: { type, count } });
