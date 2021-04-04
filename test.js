@@ -16,8 +16,12 @@
 //   );
 // }
 
-var a = [1, 2, 3, 4, 5, 6];
-a.forEach((value, index) => {
-  a[index] = value + 1;
-});
-console.log(a);
+// var a = [1, 2, 3, 4, 5, 6];
+// a.forEach((value, index) => {
+//   a[index] = value + 1;
+// });
+// console.log(a);
+
+var a = { startDate: '2021-03-18', endDate: '2021-3-23', statistic: { mike: 1 } };
+var b = { startDate: '2021-03-18', endDate: '2021-3-23', statistic: { mike: 1 } };
+console.log(a == b);
