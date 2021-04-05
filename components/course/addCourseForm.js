@@ -149,7 +149,6 @@ export default function AddCourseForm({ course, onSuccess }) {
 
   const onPreview = async (file) => {
     let src = file.url;
-
     if (!src) {
       src = await new Promise((resolve) => {
         const reader = new FileReader();
@@ -159,11 +158,8 @@ export default function AddCourseForm({ course, onSuccess }) {
     }
     const image = new Image();
     image.src = src;
-
-    setPreview({
-      previewImage: src,
-      previewTitle: file.name,
-    });
+    const imgWindow = window.open(src);
+    imgWindow.document.write(image.outerHTML);
   };
 
   const closeUploadingImg = () => {

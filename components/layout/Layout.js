@@ -1,10 +1,10 @@
 // import '../../pages/dashboard/students/node_modules/antd/dist/antd.css';
 import {
-  LogoutOutlined,
+  UserOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  BellOutlined,
-  UserOutlined,
+  ProfileOutlined,
+  LoginOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
 import {
@@ -132,7 +132,7 @@ function renderMenuItems(data, parent = '') {
         </SubMenu>
       );
     } else {
-      return (
+      return item.hide ? null : (
         <Menu.Item key={key} title={item.label} icon={item.icon}>
           {!!item.path.length || item.label.toLowerCase() === 'overview' ? (
             <Link
@@ -152,21 +152,13 @@ function renderMenuItems(data, parent = '') {
   });
 }
 
-const axios = require('axios');
-
 export default function APPLayout(props) {
   const router = useRouter();
   const [collapsed, toggleCollapse] = useState(false);
-  const [unreadTotalMessages, setUnreadTotalMessages] = useState(0);
-  const [messageNum, setMessageNum] = useState(0);
-  const [message, setMessage] = useState(null);
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-  });
   const userType = useUserType();
   const sideNav = routes[userType];
   const menuItems = renderMenuItems(sideNav);
+  const [avatar, setAvatar] = useState('');
   const { defaultOpenKeys, defaultSelectedKeys } = getMenuConfig(sideNav);
   const { messageStore, dispatch } = useMessageStatistic();
   const toggle = () => {
@@ -182,6 +174,37 @@ export default function APPLayout(props) {
       router.push('/login');
     }
   };
+
+  // account icon has include the profile and logout function for student and manager
+  const menu =
+    userType === 'manager' ? (
+      <Menu>
+        <Menu.Item icon={<LoginOutlined />} onClick={logoutFunction}>
+          Logout
+        </Menu.Item>
+      </Menu>
+    ) : (
+      <Menu>
+        <Menu.Item icon={<ProfileOutlined />}>
+          <Link href={`/dashboard/${userType}/profile`}>
+            <span>Profile</span>
+          </Link>
+        </Menu.Item>
+        <Menu.Item icon={<LoginOutlined />} onClick={logoutFunction}>
+          Logout
+        </Menu.Item>
+      </Menu>
+    );
+
+  useEffect(() => {
+    if (storage.getUserInfo().role === 'student' || storage.getUserInfo().role === 'teacher') {
+      const userId = storage?.getUserInfo().userId;
+      apiService.getProfileByUserId({ userId: userId }).then((res) => {
+        const { data } = res;
+        setAvatar(data?.avatar);
+      });
+    }
+  }, []);
 
   return (
     <Layout style={{ height: '100vh' }} hasSider={true}>
@@ -214,8 +237,10 @@ export default function APPLayout(props) {
               </HeaderIcon>
             </Badge>
 
-            <HeaderIcon style={{ paddingLeft: '15px' }}>
-              <LogoutOutlined onClick={logoutFunction} />
+            <HeaderIcon style={{ paddingLeft: '30px' }}>
+              <Dropdown overlay={menu} placement="bottomLeft">
+                {avatar ? <Avatar src={avatar} /> : <Avatar icon={<UserOutlined />} />}
+              </Dropdown>
             </HeaderIcon>
           </Row>
         </StyledLayoutHeader>

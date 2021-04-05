@@ -26,7 +26,6 @@ export default function AppBreadcrumb() {
       </Breadcrumb.Item>
 
       {sideNames.map((item, index) => {
-        // console.log(item);
         if (item === 'Detail') {
           return <Breadcrumb.Item key={index}>Detail</Breadcrumb.Item>;
         }
