@@ -5,6 +5,7 @@ import Header from '../components/home/header';
 
 export default function Page() {
   const styles = new Array(8).fill(0).map((_, index) => ({ '--i': index }));
+
   return (
     <>
       <Head>
@@ -21,6 +22,29 @@ export default function Page() {
       <Header></Header>
 
       <div className="divider"></div>
+
+      <div className="content">
+        <div className="container">
+          <h1 className="single">merit student</h1>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: 300,
+            }}
+          >
+            <div className="gallery-box">
+              {styles.map((item, index) => (
+                <span style={item}>
+                  <img src={`images/5${index === 0 ? '' : '_' + (index + 1)}.png`} />
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="content">
         <div className="container">
